@@ -12,7 +12,7 @@ export default function Buildings() {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Building | null>(null);
   const [loading, setLoading] = useState(false);
-  const empty = { projectId: "", buildingName: "", buildingCode: "", floorsCount: "0", description: "" };
+  const empty = { projectId: "", buildingName: "", buildingCode: "", floorsCount: "0", landArea: "", totalSaleableArea: "", description: "" };
   const [form, setForm] = useState(empty);
 
   const { data: buildings = [], isLoading } = useQuery<Building[]>({ queryKey: ["buildings"], queryFn: () => api.get("/buildings") });
@@ -20,14 +20,32 @@ export default function Buildings() {
   const filtered = buildings.filter(b => !search || b.BUILDING_NAME.includes(search) || b.PROJECT_NAME.includes(search));
 
   const openAdd = () => { setEditing(null); setForm(empty); setShowModal(true); };
-  const openEdit = (b: Building) => { setEditing(b); setForm({ projectId: String(b.PROJECT_ID), buildingName: b.BUILDING_NAME, buildingCode: b.BUILDING_CODE || "", floorsCount: String(b.FLOORS_COUNT), description: b.DESCRIPTION || "" }); setShowModal(true); };
+  const openEdit = (b: Building) => {
+    setEditing(b);
+    setForm({
+      projectId: String(b.PROJECT_ID),
+      buildingName: b.BUILDING_NAME,
+      buildingCode: b.BUILDING_CODE || "",
+      floorsCount: String(b.FLOORS_COUNT),
+      landArea: b.LAND_AREA != null ? String(b.LAND_AREA) : "",
+      totalSaleableArea: b.TOTAL_SALEABLE_AREA != null ? String(b.TOTAL_SALEABLE_AREA) : "",
+      description: b.DESCRIPTION || "",
+    });
+    setShowModal(true);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.projectId || !form.buildingName) { toast.error("المشروع واسم المبنى مطلوبان"); return; }
     setLoading(true);
     try {
-      const body = { ...form, projectId: Number(form.projectId), floorsCount: Number(form.floorsCount) };
+      const body = {
+        ...form,
+        projectId: Number(form.projectId),
+        floorsCount: Number(form.floorsCount),
+        landArea: form.landArea ? Number(form.landArea) : null,
+        totalSaleableArea: form.totalSaleableArea ? Number(form.totalSaleableArea) : null,
+      };
       if (editing) { await api.put(`/buildings/${editing.BUILDING_ID}`, body); toast.success("تم تحديث المبنى"); }
       else { await api.post("/buildings", body); toast.success("تمت إضافة المبنى"); }
       qc.invalidateQueries({ queryKey: ["buildings"] });
@@ -57,9 +75,9 @@ export default function Buildings() {
 
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         <table className="apex-table">
-          <thead><tr><th>#</th><th>المبنى</th><th>الكود</th><th>المشروع</th><th>عدد الأدوار</th>{isAdmin && <th>إجراءات</th>}</tr></thead>
+          <thead><tr><th>#</th><th>المبنى</th><th>الكود</th><th>المشروع</th><th>عدد الأدوار</th><th>مساحة القطعة (م²)</th><th>إجمالي المساحات البيعية (م²)</th>{isAdmin && <th>إجراءات</th>}</tr></thead>
           <tbody>
-            {isLoading ? <tr><td colSpan={6} className="text-center py-8 text-gray-400">جارٍ التحميل...</td></tr>
+            {isLoading ? <tr><td colSpan={8} className="text-center py-8 text-gray-400">جارٍ التحميل...</td></tr>
             : filtered.map((b, i) => (
               <tr key={b.BUILDING_ID}>
                 <td className="text-gray-400">{i + 1}</td>
@@ -74,6 +92,8 @@ export default function Buildings() {
                     <span className="text-sm">{b.FLOORS_COUNT}</span>
                   </div>
                 </td>
+                <td className="text-gray-700 font-mono">{b.LAND_AREA != null ? Number(b.LAND_AREA).toLocaleString("ar-SA") : <span className="text-gray-300">-</span>}</td>
+                <td className="text-gray-700 font-mono">{b.TOTAL_SALEABLE_AREA != null ? Number(b.TOTAL_SALEABLE_AREA).toLocaleString("ar-SA") : <span className="text-gray-300">-</span>}</td>
                 {isAdmin && <td><div className="flex gap-2">
                   <button onClick={() => openEdit(b)} className="text-xs border border-[#1b6ca8] text-[#1b6ca8] px-2 py-1 rounded hover:bg-[#1b6ca8] hover:text-white transition-colors"><Edit className="w-3 h-3 inline ml-1" />تعديل</button>
                   <button onClick={() => handleDelete(b)} className="text-xs border border-red-400 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"><Trash2 className="w-3 h-3 inline ml-1" />حذف</button>
@@ -96,6 +116,10 @@ export default function Buildings() {
               <div><label className="text-sm font-medium block mb-1">اسم المبنى *</label><input className={ic} value={form.buildingName} onChange={s("buildingName")} required /></div>
               <div><label className="text-sm font-medium block mb-1">كود المبنى</label><input className={ic} value={form.buildingCode} onChange={s("buildingCode")} /></div>
               <div><label className="text-sm font-medium block mb-1">عدد الأدوار</label><input type="number" className={ic} value={form.floorsCount} onChange={s("floorsCount")} min={0} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="text-sm font-medium block mb-1">مساحة القطعة (م²)</label><input type="number" step="0.01" className={ic} value={form.landArea} onChange={s("landArea")} min={0} placeholder="260.00" /></div>
+                <div><label className="text-sm font-medium block mb-1">إجمالي المساحات البيعية (م²)</label><input type="number" step="0.01" className={ic} value={form.totalSaleableArea} onChange={s("totalSaleableArea")} min={0} placeholder="417.50" /></div>
+              </div>
               <div><label className="text-sm font-medium block mb-1">الوصف</label><textarea className={ic} value={form.description} onChange={s("description")} rows={2} /></div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1b6ca8] text-white py-2 rounded-md font-medium hover:bg-[#15598d] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>

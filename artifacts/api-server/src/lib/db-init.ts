@@ -375,6 +375,33 @@ export async function initDatabase(): Promise<{
       created.push("UNIT_IMAGES (exists)");
     }
 
+    // ── Schema migrations: add missing columns safely ──────────────────────────
+    async function columnExists(table: string, col: string): Promise<boolean> {
+      const r = await conn!.execute<[number]>(
+        `SELECT COUNT(*) FROM USER_TAB_COLUMNS WHERE TABLE_NAME=:1 AND COLUMN_NAME=:2`,
+        [table.toUpperCase(), col.toUpperCase()],
+      );
+      return (r.rows?.[0]?.[0] ?? 0) > 0;
+    }
+
+    if (!(await columnExists("BUILDINGS", "LAND_AREA"))) {
+      await executeStatement(conn, `ALTER TABLE BUILDINGS ADD LAND_AREA NUMBER(10,2)`, "ALTER BUILDINGS ADD LAND_AREA");
+      created.push("BUILDINGS.LAND_AREA");
+    }
+    if (!(await columnExists("BUILDINGS", "TOTAL_SALEABLE_AREA"))) {
+      await executeStatement(conn, `ALTER TABLE BUILDINGS ADD TOTAL_SALEABLE_AREA NUMBER(10,2)`, "ALTER BUILDINGS ADD TOTAL_SALEABLE_AREA");
+      created.push("BUILDINGS.TOTAL_SALEABLE_AREA");
+    }
+    if (!(await columnExists("FLOORS", "FLOOR_TYPE"))) {
+      await executeStatement(conn, `ALTER TABLE FLOORS ADD FLOOR_TYPE VARCHAR2(20)`, "ALTER FLOORS ADD FLOOR_TYPE");
+      created.push("FLOORS.FLOOR_TYPE");
+    }
+    if (!(await columnExists("UNITS", "SALEABLE_AREA"))) {
+      await executeStatement(conn, `ALTER TABLE UNITS ADD SALEABLE_AREA NUMBER(10,2)`, "ALTER UNITS ADD SALEABLE_AREA");
+      created.push("UNITS.SALEABLE_AREA");
+    }
+    // ────────────────────────────────────────────────────────────────────────────
+
     // SEED DATA — only if tables are empty
     await seedData(conn);
 

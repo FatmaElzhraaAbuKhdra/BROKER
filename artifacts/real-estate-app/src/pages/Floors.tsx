@@ -5,27 +5,41 @@ import { Plus, Edit, Trash2, X, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 
+const FLOOR_TYPES = [
+  { value: "GR", label: "GR — أرضي" },
+  { value: "FIR", label: "FIR — أول" },
+  { value: "RF", label: "RF — ملحق علوي" },
+  { value: "GR_FIR", label: "GR/FIR — أرضي + أول" },
+  { value: "FIR_RF", label: "FIR/RF — أول + ملحق" },
+];
+
+const floorTypeLabel = (v: string | null) => FLOOR_TYPES.find(t => t.value === v)?.label ?? v ?? "-";
+
 export default function Floors() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Floor | null>(null);
   const [loading, setLoading] = useState(false);
-  const empty = { buildingId: "", floorNumber: "", floorName: "", description: "" };
+  const empty = { buildingId: "", floorNumber: "", floorName: "", floorType: "", description: "" };
   const [form, setForm] = useState(empty);
 
   const { data: floors = [], isLoading } = useQuery<Floor[]>({ queryKey: ["floors"], queryFn: () => api.get("/floors") });
   const { data: buildings = [] } = useQuery<Building[]>({ queryKey: ["buildings"], queryFn: () => api.get("/buildings") });
 
   const openAdd = () => { setEditing(null); setForm(empty); setShowModal(true); };
-  const openEdit = (f: Floor) => { setEditing(f); setForm({ buildingId: String(f.BUILDING_ID), floorNumber: f.FLOOR_NUMBER, floorName: f.FLOOR_NAME || "", description: f.DESCRIPTION || "" }); setShowModal(true); };
+  const openEdit = (f: Floor) => {
+    setEditing(f);
+    setForm({ buildingId: String(f.BUILDING_ID), floorNumber: f.FLOOR_NUMBER, floorName: f.FLOOR_NAME || "", floorType: f.FLOOR_TYPE || "", description: f.DESCRIPTION || "" });
+    setShowModal(true);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.buildingId || !form.floorNumber) { toast.error("المبنى ورقم الطابق مطلوبان"); return; }
     setLoading(true);
     try {
-      const body = { ...form, buildingId: Number(form.buildingId) };
+      const body = { ...form, buildingId: Number(form.buildingId), floorType: form.floorType || null };
       if (editing) { await api.put(`/floors/${editing.FLOOR_ID}`, body); toast.success("تم تحديث الطابق"); }
       else { await api.post("/floors", body); toast.success("تمت إضافة الطابق"); }
       qc.invalidateQueries({ queryKey: ["floors"] });
@@ -52,14 +66,21 @@ export default function Floors() {
 
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         <table className="apex-table">
-          <thead><tr><th>#</th><th>رقم الطابق</th><th>اسم الطابق</th><th>المبنى</th><th>المشروع</th>{isAdmin && <th>إجراءات</th>}</tr></thead>
+          <thead><tr><th>#</th><th>رقم الطابق</th><th>اسم الطابق</th><th>نوع الدور</th><th>المبنى</th><th>المشروع</th>{isAdmin && <th>إجراءات</th>}</tr></thead>
           <tbody>
-            {isLoading ? <tr><td colSpan={6} className="text-center py-8 text-gray-400">جارٍ التحميل...</td></tr>
+            {isLoading ? <tr><td colSpan={7} className="text-center py-8 text-gray-400">جارٍ التحميل...</td></tr>
             : floors.map((f, i) => (
               <tr key={f.FLOOR_ID}>
                 <td className="text-gray-400">{i + 1}</td>
                 <td><span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{f.FLOOR_NUMBER}</span></td>
                 <td className="font-medium text-[#1b3a57]">{f.FLOOR_NAME || "-"}</td>
+                <td>
+                  {f.FLOOR_TYPE ? (
+                    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">
+                      {floorTypeLabel(f.FLOOR_TYPE)}
+                    </span>
+                  ) : <span className="text-gray-300">-</span>}
+                </td>
                 <td className="text-gray-600">{f.BUILDING_NAME}</td>
                 <td className="text-gray-500">{f.PROJECT_NAME}</td>
                 {isAdmin && <td><div className="flex gap-2">
@@ -83,6 +104,13 @@ export default function Floors() {
               <div><label className="text-sm font-medium block mb-1">المبنى *</label><select className={ic} value={form.buildingId} onChange={s("buildingId")} required><option value="">-- اختر المبنى --</option>{buildings.map(b => <option key={b.BUILDING_ID} value={b.BUILDING_ID}>{b.BUILDING_NAME} - {b.PROJECT_NAME}</option>)}</select></div>
               <div><label className="text-sm font-medium block mb-1">رقم الطابق *</label><input className={ic} value={form.floorNumber} onChange={s("floorNumber")} required placeholder="1, 2, 3..." /></div>
               <div><label className="text-sm font-medium block mb-1">اسم الطابق</label><input className={ic} value={form.floorName} onChange={s("floorName")} placeholder="الطابق الأول" /></div>
+              <div>
+                <label className="text-sm font-medium block mb-1">نوع الدور</label>
+                <select className={ic} value={form.floorType} onChange={s("floorType")}>
+                  <option value="">-- اختر نوع الدور --</option>
+                  {FLOOR_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
               <div><label className="text-sm font-medium block mb-1">الوصف</label><textarea className={ic} value={form.description} onChange={s("description")} rows={2} /></div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1b6ca8] text-white py-2 rounded-md font-medium hover:bg-[#15598d] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>

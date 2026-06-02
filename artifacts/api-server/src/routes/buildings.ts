@@ -11,9 +11,9 @@ router.get("/buildings", requireAuth, async (req, res) => {
   try {
     conn = await getConnection();
     const sql = projectId
-      ? `SELECT b.BUILDING_ID, b.PROJECT_ID, b.BUILDING_NAME, b.BUILDING_CODE, b.FLOORS_COUNT, b.DESCRIPTION, p.PROJECT_NAME, b.CREATED_DATE
+      ? `SELECT b.BUILDING_ID, b.PROJECT_ID, b.BUILDING_NAME, b.BUILDING_CODE, b.FLOORS_COUNT, b.LAND_AREA, b.TOTAL_SALEABLE_AREA, b.DESCRIPTION, p.PROJECT_NAME, b.CREATED_DATE
          FROM BUILDINGS b JOIN PROJECTS p ON b.PROJECT_ID=p.PROJECT_ID WHERE b.PROJECT_ID=:1 ORDER BY b.BUILDING_ID`
-      : `SELECT b.BUILDING_ID, b.PROJECT_ID, b.BUILDING_NAME, b.BUILDING_CODE, b.FLOORS_COUNT, b.DESCRIPTION, p.PROJECT_NAME, b.CREATED_DATE
+      : `SELECT b.BUILDING_ID, b.PROJECT_ID, b.BUILDING_NAME, b.BUILDING_CODE, b.FLOORS_COUNT, b.LAND_AREA, b.TOTAL_SALEABLE_AREA, b.DESCRIPTION, p.PROJECT_NAME, b.CREATED_DATE
          FROM BUILDINGS b JOIN PROJECTS p ON b.PROJECT_ID=p.PROJECT_ID ORDER BY b.BUILDING_ID`;
     const params = projectId ? [projectId] : [];
     const result = await conn.execute(sql, params, { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -32,7 +32,7 @@ router.get("/buildings/:id", requireAuth, async (req, res) => {
   try {
     conn = await getConnection();
     const result = await conn.execute(
-      `SELECT b.BUILDING_ID, b.PROJECT_ID, b.BUILDING_NAME, b.BUILDING_CODE, b.FLOORS_COUNT, b.DESCRIPTION, p.PROJECT_NAME
+      `SELECT b.BUILDING_ID, b.PROJECT_ID, b.BUILDING_NAME, b.BUILDING_CODE, b.FLOORS_COUNT, b.LAND_AREA, b.TOTAL_SALEABLE_AREA, b.DESCRIPTION, p.PROJECT_NAME
        FROM BUILDINGS b JOIN PROJECTS p ON b.PROJECT_ID=p.PROJECT_ID WHERE b.BUILDING_ID=:1`,
       [req.params["id"]], { outFormat: oracledb.OUT_FORMAT_OBJECT },
     );
@@ -49,15 +49,15 @@ router.get("/buildings/:id", requireAuth, async (req, res) => {
 
 // POST /api/buildings
 router.post("/buildings", requireAdmin, async (req, res) => {
-  const { projectId, buildingName, buildingCode, floorsCount, description } = req.body;
+  const { projectId, buildingName, buildingCode, floorsCount, landArea, totalSaleableArea, description } = req.body;
   if (!projectId || !buildingName) { res.status(400).json({ error: "projectId and buildingName are required" }); return; }
   const sess = req.session as Record<string, unknown>;
   let conn;
   try {
     conn = await getConnection();
     await conn.execute(
-      `INSERT INTO BUILDINGS (PROJECT_ID, BUILDING_NAME, BUILDING_CODE, FLOORS_COUNT, DESCRIPTION, CREATED_BY) VALUES (:1,:2,:3,:4,:5,:6)`,
-      [projectId, buildingName, buildingCode || null, floorsCount || 0, description || null, sess["username"] || "ADMIN"],
+      `INSERT INTO BUILDINGS (PROJECT_ID, BUILDING_NAME, BUILDING_CODE, FLOORS_COUNT, LAND_AREA, TOTAL_SALEABLE_AREA, DESCRIPTION, CREATED_BY) VALUES (:1,:2,:3,:4,:5,:6,:7,:8)`,
+      [projectId, buildingName, buildingCode || null, floorsCount || 0, landArea || null, totalSaleableArea || null, description || null, sess["username"] || "ADMIN"],
       { autoCommit: true },
     );
     res.status(201).json({ message: "Building created" });
@@ -71,15 +71,15 @@ router.post("/buildings", requireAdmin, async (req, res) => {
 
 // PUT /api/buildings/:id
 router.put("/buildings/:id", requireAdmin, async (req, res) => {
-  const { projectId, buildingName, buildingCode, floorsCount, description } = req.body;
+  const { projectId, buildingName, buildingCode, floorsCount, landArea, totalSaleableArea, description } = req.body;
   if (!buildingName) { res.status(400).json({ error: "buildingName is required" }); return; }
   const sess = req.session as Record<string, unknown>;
   let conn;
   try {
     conn = await getConnection();
     const r = await conn.execute(
-      `UPDATE BUILDINGS SET PROJECT_ID=:1, BUILDING_NAME=:2, BUILDING_CODE=:3, FLOORS_COUNT=:4, DESCRIPTION=:5, UPDATED_BY=:6, UPDATED_DATE=SYSDATE WHERE BUILDING_ID=:7`,
-      [projectId, buildingName, buildingCode || null, floorsCount || 0, description || null, sess["username"] || "ADMIN", req.params["id"]],
+      `UPDATE BUILDINGS SET PROJECT_ID=:1, BUILDING_NAME=:2, BUILDING_CODE=:3, FLOORS_COUNT=:4, LAND_AREA=:5, TOTAL_SALEABLE_AREA=:6, DESCRIPTION=:7, UPDATED_BY=:8, UPDATED_DATE=SYSDATE WHERE BUILDING_ID=:9`,
+      [projectId, buildingName, buildingCode || null, floorsCount || 0, landArea || null, totalSaleableArea || null, description || null, sess["username"] || "ADMIN", req.params["id"]],
       { autoCommit: true },
     );
     if ((r.rowsAffected ?? 0) === 0) { res.status(404).json({ error: "Building not found" }); return; }

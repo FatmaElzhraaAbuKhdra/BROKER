@@ -14,7 +14,7 @@ export default function UnitForm() {
 
   const [form, setForm] = useState({
     unitCode: "", unitName: "", typeId: "", projectId: "",
-    buildingId: "", floorId: "", area: "", rooms: "0",
+    buildingId: "", floorId: "", area: "", saleableArea: "", rooms: "0",
     bathrooms: "0", price: "", description: "",
   });
 
@@ -30,7 +30,9 @@ export default function UnitForm() {
         unitCode: existing.UNIT_CODE, unitName: existing.UNIT_NAME,
         typeId: String(existing.TYPE_ID), projectId: String(existing.PROJECT_ID),
         buildingId: String(existing.BUILDING_ID), floorId: String(existing.FLOOR_ID),
-        area: String(existing.AREA), rooms: String(existing.ROOMS),
+        area: String(existing.AREA),
+        saleableArea: existing.SALEABLE_AREA != null ? String(existing.SALEABLE_AREA) : "",
+        rooms: String(existing.ROOMS),
         bathrooms: String(existing.BATHROOMS), price: String(existing.PRICE),
         description: existing.DESCRIPTION || "",
       });
@@ -62,7 +64,7 @@ export default function UnitForm() {
     if (Number(form.area) <= 0) { toast.error("المساحة يجب أن تكون أكبر من 0"); return; }
     setLoading(true);
     try {
-      const body = { ...form, typeId: Number(form.typeId), projectId: Number(form.projectId), buildingId: Number(form.buildingId), floorId: Number(form.floorId), area: Number(form.area), rooms: Number(form.rooms), bathrooms: Number(form.bathrooms), price: Number(form.price) };
+      const body = { ...form, typeId: Number(form.typeId), projectId: Number(form.projectId), buildingId: Number(form.buildingId), floorId: Number(form.floorId), area: Number(form.area), saleableArea: form.saleableArea ? Number(form.saleableArea) : null, rooms: Number(form.rooms), bathrooms: Number(form.bathrooms), price: Number(form.price) };
       if (isEdit) {
         await api.put(`/units/${id}`, body);
         toast.success("تم تحديث الوحدة");
@@ -128,7 +130,8 @@ export default function UnitForm() {
               {floors.map(f => <option key={f.FLOOR_ID} value={f.FLOOR_ID}>{f.FLOOR_NAME || f.FLOOR_NUMBER}</option>)}
             </select>
           </F>
-          <F label="المساحة (م²)" required><input className={inputClass} type="number" value={form.area} onChange={set("area")} min={1} /></F>
+          <F label="المساحة الإنشائية (م²)" required><input className={inputClass} type="number" step="0.01" value={form.area} onChange={set("area")} min={1} /></F>
+          <F label="المساحة البيعية (م²)"><input className={inputClass} type="number" step="0.01" value={form.saleableArea} onChange={set("saleableArea")} min={0} placeholder="اختياري" /></F>
           <F label="السعر (ريال)" required><input className={inputClass} type="number" value={form.price} onChange={set("price")} min={1} /></F>
           <F label="عدد الغرف"><input className={inputClass} type="number" value={form.rooms} onChange={set("rooms")} min={0} /></F>
           <F label="عدد الحمامات"><input className={inputClass} type="number" value={form.bathrooms} onChange={set("bathrooms")} min={0} /></F>

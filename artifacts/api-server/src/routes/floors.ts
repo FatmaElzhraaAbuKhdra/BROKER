@@ -11,10 +11,10 @@ router.get("/floors", requireAuth, async (req, res) => {
   try {
     conn = await getConnection();
     const sql = buildingId
-      ? `SELECT f.FLOOR_ID, f.BUILDING_ID, f.FLOOR_NUMBER, f.FLOOR_NAME, f.DESCRIPTION, b.BUILDING_NAME, p.PROJECT_NAME
+      ? `SELECT f.FLOOR_ID, f.BUILDING_ID, f.FLOOR_NUMBER, f.FLOOR_NAME, f.FLOOR_TYPE, f.DESCRIPTION, b.BUILDING_NAME, p.PROJECT_NAME
          FROM FLOORS f JOIN BUILDINGS b ON f.BUILDING_ID=b.BUILDING_ID JOIN PROJECTS p ON b.PROJECT_ID=p.PROJECT_ID
          WHERE f.BUILDING_ID=:1 ORDER BY f.FLOOR_ID`
-      : `SELECT f.FLOOR_ID, f.BUILDING_ID, f.FLOOR_NUMBER, f.FLOOR_NAME, f.DESCRIPTION, b.BUILDING_NAME, p.PROJECT_NAME
+      : `SELECT f.FLOOR_ID, f.BUILDING_ID, f.FLOOR_NUMBER, f.FLOOR_NAME, f.FLOOR_TYPE, f.DESCRIPTION, b.BUILDING_NAME, p.PROJECT_NAME
          FROM FLOORS f JOIN BUILDINGS b ON f.BUILDING_ID=b.BUILDING_ID JOIN PROJECTS p ON b.PROJECT_ID=p.PROJECT_ID
          ORDER BY f.FLOOR_ID`;
     const result = await conn.execute(sql, buildingId ? [buildingId] : [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -33,7 +33,7 @@ router.get("/floors/:id", requireAuth, async (req, res) => {
   try {
     conn = await getConnection();
     const result = await conn.execute(
-      `SELECT f.FLOOR_ID, f.BUILDING_ID, f.FLOOR_NUMBER, f.FLOOR_NAME, f.DESCRIPTION, b.BUILDING_NAME, p.PROJECT_NAME
+      `SELECT f.FLOOR_ID, f.BUILDING_ID, f.FLOOR_NUMBER, f.FLOOR_NAME, f.FLOOR_TYPE, f.DESCRIPTION, b.BUILDING_NAME, p.PROJECT_NAME
        FROM FLOORS f JOIN BUILDINGS b ON f.BUILDING_ID=b.BUILDING_ID JOIN PROJECTS p ON b.PROJECT_ID=p.PROJECT_ID
        WHERE f.FLOOR_ID=:1`,
       [req.params["id"]], { outFormat: oracledb.OUT_FORMAT_OBJECT },
@@ -51,15 +51,15 @@ router.get("/floors/:id", requireAuth, async (req, res) => {
 
 // POST /api/floors
 router.post("/floors", requireAdmin, async (req, res) => {
-  const { buildingId, floorNumber, floorName, description } = req.body;
+  const { buildingId, floorNumber, floorName, floorType, description } = req.body;
   if (!buildingId || !floorNumber) { res.status(400).json({ error: "buildingId and floorNumber are required" }); return; }
   const sess = req.session as Record<string, unknown>;
   let conn;
   try {
     conn = await getConnection();
     await conn.execute(
-      `INSERT INTO FLOORS (BUILDING_ID, FLOOR_NUMBER, FLOOR_NAME, DESCRIPTION, CREATED_BY) VALUES (:1,:2,:3,:4,:5)`,
-      [buildingId, floorNumber, floorName || null, description || null, sess["username"] || "ADMIN"],
+      `INSERT INTO FLOORS (BUILDING_ID, FLOOR_NUMBER, FLOOR_NAME, FLOOR_TYPE, DESCRIPTION, CREATED_BY) VALUES (:1,:2,:3,:4,:5,:6)`,
+      [buildingId, floorNumber, floorName || null, floorType || null, description || null, sess["username"] || "ADMIN"],
       { autoCommit: true },
     );
     res.status(201).json({ message: "Floor created" });
@@ -73,15 +73,15 @@ router.post("/floors", requireAdmin, async (req, res) => {
 
 // PUT /api/floors/:id
 router.put("/floors/:id", requireAdmin, async (req, res) => {
-  const { buildingId, floorNumber, floorName, description } = req.body;
+  const { buildingId, floorNumber, floorName, floorType, description } = req.body;
   if (!floorNumber) { res.status(400).json({ error: "floorNumber is required" }); return; }
   const sess = req.session as Record<string, unknown>;
   let conn;
   try {
     conn = await getConnection();
     const r = await conn.execute(
-      `UPDATE FLOORS SET BUILDING_ID=:1, FLOOR_NUMBER=:2, FLOOR_NAME=:3, DESCRIPTION=:4, UPDATED_BY=:5, UPDATED_DATE=SYSDATE WHERE FLOOR_ID=:6`,
-      [buildingId, floorNumber, floorName || null, description || null, sess["username"] || "ADMIN", req.params["id"]],
+      `UPDATE FLOORS SET BUILDING_ID=:1, FLOOR_NUMBER=:2, FLOOR_NAME=:3, FLOOR_TYPE=:4, DESCRIPTION=:5, UPDATED_BY=:6, UPDATED_DATE=SYSDATE WHERE FLOOR_ID=:7`,
+      [buildingId, floorNumber, floorName || null, floorType || null, description || null, sess["username"] || "ADMIN", req.params["id"]],
       { autoCommit: true },
     );
     if ((r.rowsAffected ?? 0) === 0) { res.status(404).json({ error: "Floor not found" }); return; }

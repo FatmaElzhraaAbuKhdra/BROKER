@@ -78,6 +78,8 @@ export interface Building {
   BUILDING_NAME: string;
   BUILDING_CODE: string;
   FLOORS_COUNT: number;
+  LAND_AREA: number | null;
+  TOTAL_SALEABLE_AREA: number | null;
   DESCRIPTION: string;
   PROJECT_NAME: string;
   CREATED_DATE: string;
@@ -88,6 +90,7 @@ export interface Floor {
   BUILDING_ID: number;
   FLOOR_NUMBER: string;
   FLOOR_NAME: string;
+  FLOOR_TYPE: string | null;
   DESCRIPTION: string;
   BUILDING_NAME: string;
   PROJECT_NAME: string;
@@ -113,6 +116,7 @@ export interface Unit {
   BUILDING_ID: number;
   FLOOR_ID: number;
   AREA: number;
+  SALEABLE_AREA: number | null;
   ROOMS: number;
   BATHROOMS: number;
   PRICE: number;
@@ -123,6 +127,7 @@ export interface Unit {
   BUILDING_NAME: string;
   FLOOR_NUMBER: string;
   FLOOR_NAME: string;
+  FLOOR_TYPE: string | null;
   IMAGES?: UnitImage[];
   CREATED_DATE: string;
 }
