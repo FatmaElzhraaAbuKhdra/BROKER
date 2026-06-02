@@ -38,7 +38,7 @@ export default function Login() {
               <Building2 className="w-10 h-10 text-[#f0a500]" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold mb-1">شركة العقارات المتحدة</h1>
+          <h1 className="text-2xl font-bold mb-1">شركة العقارات</h1>
           <span className="text-xs bg-white/20 px-3 py-1 rounded-full">نظام إدارة العقارات</span>
         </div>
 

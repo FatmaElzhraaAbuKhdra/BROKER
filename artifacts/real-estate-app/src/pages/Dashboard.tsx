@@ -6,7 +6,18 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-const COLORS = ["#1b6ca8", "#f0a500", "#2e7d32", "#0d7a8a", "#dc3545", "#6c757d"];
+const COLORS = ["#1b6ca8", "#f0a500", "#2e7d32", "#0d7a8a", "#dc3545", "#6c757d", "#8e44ad", "#e67e22"];
+
+const STATUS_AR: Record<string, string> = {
+  AVAILABLE: "متاحة",
+  SOLD: "مباعة",
+  RESERVED: "محجوزة",
+};
+const STATUS_COLOR: Record<string, string> = {
+  AVAILABLE: "#2e7d32",
+  SOLD: "#dc3545",
+  RESERVED: "#f0a500",
+};
 
 export default function Dashboard() {
   const { data: kpis, isLoading: kpiLoading } = useQuery<DashboardKpis>({
@@ -36,9 +47,12 @@ export default function Dashboard() {
   const kpiCards = [
     { label: "إجمالي الوحدات", value: kpis?.totalUnits ?? 0, icon: Building2, color: "#1b6ca8", bg: "#e8f0f8" },
     { label: "وحدات مباعة", value: kpis?.soldUnits ?? 0, icon: Home, color: "#dc3545", bg: "#fce8ea" },
-    { label: "وحدات متاحة", value: kpis?.availableUnits ?? 0, icon: Home, color: "#2e7d32", bg: "#e8f5e9" },
+    { label: "وحدات متاحة", value: kpis?.availableUnits ?? 0, icon: TrendingUp, color: "#2e7d32", bg: "#e8f5e9" },
     { label: "قيمة المبيعات", value: formatPrice(kpis?.totalSalesValue ?? 0), icon: DollarSign, color: "#f0a500", bg: "#fff8e1" },
   ];
+
+  const typeData = (byType ?? []).filter(d => d.COUNT > 0);
+  const statusData = (byStatus ?? []).map(d => ({ ...d, name: STATUS_AR[d.STATUS] ?? d.STATUS }));
 
   return (
     <div dir="rtl" className="space-y-6">
@@ -66,31 +80,54 @@ export default function Dashboard() {
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Units by type — pie */}
+        {/* Units by type — pie with legend */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h2 className="font-semibold text-[#1b3a57] mb-4 text-sm">الوحدات حسب النوع</h2>
-          <ResponsiveContainer width="100%" height={200}>
+          <h2 className="font-semibold text-[#1b3a57] mb-3 text-sm">الوحدات حسب النوع</h2>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={byType ?? []} dataKey="COUNT" nameKey="TYPE_NAME" cx="50%" cy="50%" outerRadius={80} label={({ TYPE_NAME, COUNT }) => `${TYPE_NAME}: ${COUNT}`}>
-                {(byType ?? []).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+              <Pie
+                data={typeData}
+                dataKey="COUNT"
+                nameKey="TYPE_NAME"
+                cx="50%"
+                cy="50%"
+                outerRadius={75}
+                innerRadius={30}
+              >
+                {typeData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={(val) => [`${val} وحدة`]} />
+              <Tooltip formatter={(val, _name, props) => [`${val} وحدة`, props.payload?.TYPE_NAME]} />
+              <Legend
+                formatter={(value) => <span style={{ fontSize: 12 }}>{value}</span>}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Available vs Sold — pie */}
+        {/* Units status — pie with legend */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h2 className="font-semibold text-[#1b3a57] mb-4 text-sm">حالة الوحدات</h2>
-          <ResponsiveContainer width="100%" height={200}>
+          <h2 className="font-semibold text-[#1b3a57] mb-3 text-sm">حالة الوحدات</h2>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={byStatus ?? []} dataKey="COUNT" nameKey="STATUS" cx="50%" cy="50%" outerRadius={80}
-                label={({ STATUS, COUNT }) => `${STATUS === "AVAILABLE" ? "متاحة" : STATUS === "SOLD" ? "مباعة" : "محجوزة"}: ${COUNT}`}>
-                {(byStatus ?? []).map((item, i) => (
-                  <Cell key={i} fill={item.STATUS === "AVAILABLE" ? "#2e7d32" : item.STATUS === "SOLD" ? "#dc3545" : "#f0a500"} />
+              <Pie
+                data={statusData}
+                dataKey="COUNT"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={75}
+                innerRadius={30}
+                label={({ name, COUNT, percent }) =>
+                  percent > 0.05 ? `${name}: ${COUNT}` : ""
+                }
+                labelLine={false}
+              >
+                {statusData.map((item, i) => (
+                  <Cell key={i} fill={STATUS_COLOR[item.STATUS] ?? COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(val, _name, props) => [`${val} وحدة`, props.payload?.name]} />
+              <Legend formatter={(value) => <span style={{ fontSize: 12 }}>{value}</span>} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -100,12 +137,11 @@ export default function Dashboard() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <h2 className="font-semibold text-[#1b3a57] mb-4 text-sm">المبيعات حسب المشروع</h2>
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={byProject ?? []} margin={{ top: 5, right: 10, left: 40, bottom: 5 }}>
+          <BarChart data={byProject ?? []} margin={{ top: 5, right: 10, left: 40, bottom: 40 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="PROJECT_NAME" tick={{ fontSize: 11 }} />
+            <XAxis dataKey="PROJECT_NAME" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" interval={0} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
             <Tooltip formatter={(val) => [formatPrice(Number(val)), "قيمة المبيعات"]} />
-            <Legend />
             <Bar dataKey="TOTAL_AMOUNT" name="قيمة المبيعات" fill="#1b6ca8" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
