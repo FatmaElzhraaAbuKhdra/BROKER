@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/app/"
+title = "نظام إدارة العقارات"
+version = "1.0.0"
+id = "artifacts/real-estate-app"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/app/" ]
+localPort = 19381
+
+[services.development]
+run = "pnpm --filter @workspace/real-estate-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/real-estate-app", "run", "build" ]
+publicDir = "artifacts/real-estate-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19381"
+BASE_PATH = "/app/"
