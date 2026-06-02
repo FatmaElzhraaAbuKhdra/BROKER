@@ -588,4 +588,120 @@ async function seedData(conn: import("oracledb").Connection): Promise<void> {
       logger.info("Seeded: SALES");
     }
   }
+
+  // ── Seed Al-Ramal client data (18 plots from license table) ─────────────────
+  const alRamalExists = await conn.execute<[number]>(
+    `SELECT COUNT(*) FROM PROJECTS WHERE PROJECT_NAME = :1`,
+    ["الرمال - آل متعب"],
+  );
+  if ((alRamalExists.rows?.[0]?.[0] ?? 0) === 0) {
+    // Get villa type ID
+    const vtRes = await conn.execute<[number]>(
+      `SELECT TYPE_ID FROM UNIT_TYPES WHERE ROWNUM=1 ORDER BY TYPE_ID`,
+    );
+    const villaTypeId: number = vtRes.rows?.[0]?.[0] ?? 1;
+
+    // Insert project
+    await conn.execute(
+      `INSERT INTO PROJECTS (PROJECT_ID, PROJECT_NAME, LOCATION, DESCRIPTION, STATUS, CREATED_BY)
+       VALUES (SEQ_PROJECTS.NEXTVAL, :1, :2, :3, 'ACTIVE', 'SYSTEM')`,
+      ["الرمال - آل متعب", "الرمال", "فلل متلاصقة - جدول حسابات مساحات الرخصة"],
+    );
+    const projIdRes = await conn.execute<[number]>(`SELECT SEQ_PROJECTS.CURRVAL FROM DUAL`);
+    const projId = projIdRes.rows?.[0]?.[0] as number;
+
+    // Plot definitions: [plotNum, landArea, totalSaleableArea, floors[]]
+    // floors: [floorNumber, floorName, floorType, unitCodeSuffix, unitArea]
+    const plots: Array<{
+      num: number;
+      land: number;
+      total: number;
+      floors: Array<{ num: number; name: string; type: string; code: string; area: number }>;
+    }> = [];
+
+    // Plots 1-16: 3 floors each
+    for (let i = 1; i <= 16; i++) {
+      const grArea = i === 1 ? 165.0 : 170.0;
+      const totalArea = i === 1 ? 417.5 : 422.5;
+      plots.push({
+        num: i,
+        land: 260.0,
+        total: totalArea,
+        floors: [
+          { num: 1, name: "الدور الأرضي", type: "GR", code: `${i.toString().padStart(2, "0")}-GR`, area: grArea },
+          { num: 2, name: "الدور الأول", type: "FIR", code: `${i.toString().padStart(2, "0")}-FIR`, area: 168.5 },
+          { num: 3, name: "الملحق العلوي", type: "RF", code: `${i.toString().padStart(2, "0")}-RF`, area: 84.0 },
+        ],
+      });
+    }
+    // Plot 17
+    plots.push({
+      num: 17,
+      land: 247.78,
+      total: 395.0,
+      floors: [
+        { num: 1, name: "أرضي + أول", type: "GR_FIR", code: "17-GR/FIR", area: 232.0 },
+        { num: 2, name: "أول + ملحق", type: "FIR_RF", code: "17-FIR/RF", area: 163.0 },
+      ],
+    });
+    // Plot 18
+    plots.push({
+      num: 18,
+      land: 268.0,
+      total: 395.0,
+      floors: [
+        { num: 1, name: "أرضي + أول", type: "GR_FIR", code: "18-GR/FIR", area: 232.0 },
+        { num: 2, name: "أول + ملحق", type: "FIR_RF", code: "18-FIR/RF", area: 163.0 },
+      ],
+    });
+
+    for (const plot of plots) {
+      // Insert building
+      await conn.execute(
+        `INSERT INTO BUILDINGS (BUILDING_ID, PROJECT_ID, BUILDING_NAME, BUILDING_CODE, FLOORS_COUNT, LAND_AREA, TOTAL_SALEABLE_AREA, DESCRIPTION, CREATED_BY)
+         VALUES (SEQ_BUILDINGS.NEXTVAL, :1, :2, :3, :4, :5, :6, :7, 'SYSTEM')`,
+        [
+          projId,
+          `قطعة ${plot.num}`,
+          `قطعة-${plot.num}`,
+          plot.floors.length,
+          plot.land,
+          plot.total,
+          `قطعة رقم ${plot.num} - مساحة القطعة ${plot.land} م²`,
+        ],
+      );
+      const bldIdRes = await conn.execute<[number]>(`SELECT SEQ_BUILDINGS.CURRVAL FROM DUAL`);
+      const bldId = bldIdRes.rows?.[0]?.[0] as number;
+
+      for (const fl of plot.floors) {
+        // Insert floor
+        await conn.execute(
+          `INSERT INTO FLOORS (FLOOR_ID, BUILDING_ID, FLOOR_NUMBER, FLOOR_NAME, FLOOR_TYPE, DESCRIPTION, CREATED_BY)
+           VALUES (SEQ_FLOORS.NEXTVAL, :1, :2, :3, :4, :5, 'SYSTEM')`,
+          [bldId, String(fl.num), fl.name, fl.type, `${fl.name} - نوع ${fl.type}`],
+        );
+        const flIdRes = await conn.execute<[number]>(`SELECT SEQ_FLOORS.CURRVAL FROM DUAL`);
+        const flId = flIdRes.rows?.[0]?.[0] as number;
+
+        // Insert unit (PRICE=1 as placeholder — must be > 0 per CHK_UNITS_PRICE constraint)
+        await conn.execute(
+          `INSERT INTO UNITS (UNIT_ID, UNIT_CODE, UNIT_NAME, TYPE_ID, PROJECT_ID, BUILDING_ID, FLOOR_ID, AREA, SALEABLE_AREA, ROOMS, BATHROOMS, PRICE, STATUS, DESCRIPTION, CREATED_BY)
+           VALUES (SEQ_UNITS.NEXTVAL, :1, :2, :3, :4, :5, :6, :7, :8, 0, 0, 1, 'AVAILABLE', :9, 'SYSTEM')`,
+          [
+            fl.code,
+            `وحدة ${fl.code}`,
+            villaTypeId,
+            projId,
+            bldId,
+            flId,
+            fl.area,
+            fl.area,
+            `${fl.name} - قطعة ${plot.num} - مساحة ${fl.area} م²`,
+          ],
+        );
+      }
+    }
+    logger.info("Seeded: الرمال - آل متعب project (18 plots, 50 units)");
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
 }
