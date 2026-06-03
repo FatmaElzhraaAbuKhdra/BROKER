@@ -65,7 +65,7 @@ export default function Sales() {
         <h1 className="text-xl font-bold text-[#0D4D3A]">سجلات المبيعات</h1>
         <div className="flex items-center gap-3">
           <div className="relative"><Search className="absolute top-2.5 right-3 w-4 h-4 text-gray-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث..." className="pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" /></div>
-          <button onClick={openAdd} className="flex items-center gap-2 bg-[#25B897] text-white px-4 py-2 rounded-md text-sm hover:bg-[#d8940a]"><Plus className="w-4 h-4" /> تسجيل بيع</button>
+          <button onClick={openAdd} className="flex items-center gap-2 bg-[#25B897] text-white px-4 py-2 rounded-md text-sm hover:bg-[#147A5E]"><Plus className="w-4 h-4" /> تسجيل بيع</button>
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export default function Sales() {
               </tr>
             ))}
             {!isLoading && sales.length > 0 && (
-              <tr className="bg-[#f0f8ff] font-bold border-t-2 border-[#1A8A6C]">
+              <tr className="bg-[#E1F5EE] font-bold border-t-2 border-[#1A8A6C]">
                 <td colSpan={5} className="text-left text-[#0D4D3A]">الإجمالي ({sales.length} عملية)</td>
                 <td className="text-[#1A8A6C] text-base">{formatPrice(totalSales)}</td>
                 <td colSpan={2} />
@@ -111,7 +111,7 @@ export default function Sales() {
               <div><label className="text-sm font-medium block mb-1">مبلغ البيع *</label><input type="number" className={ic} value={form.saleAmount} onChange={s("saleAmount")} required min={1} /></div>
               <div><label className="text-sm font-medium block mb-1">ملاحظات</label><textarea className={ic} value={form.notes} onChange={s("notes")} rows={2} /></div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#25B897] text-white py-2 rounded-md font-medium hover:bg-[#d8940a] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
+                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#25B897] text-white py-2 rounded-md font-medium hover:bg-[#147A5E] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-md hover:bg-gray-50">إلغاء</button>
               </div>
             </form>

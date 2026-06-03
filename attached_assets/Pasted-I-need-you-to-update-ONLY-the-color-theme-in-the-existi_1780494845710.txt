@@ -1,0 +1,90 @@
+I need you to update ONLY the color theme in the existing React project inside `artifacts/real-estate-app/`. Do NOT rewrite any logic, components, or structure. Only change colors.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — FIND THE COLOR FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Look inside `artifacts/real-estate-app/src/` for any of these files (check all):
+- index.css / global.css / app.css / main.css
+- theme.ts / theme.js / colors.ts / colors.js
+- tailwind.config.ts / tailwind.config.js
+- Any file containing CSS custom properties (--color-*) or a color palette object
+
+Open each file and show me the current color values before changing anything.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — REPLACE WITH NEW PALETTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Replace ALL existing brand/primary/accent colors with this new palette. Match by role, not by name:
+
+/* Deep dark green — replaces any dark navy/dark blue used for sidebar, header, primary bg */
+--color-primary:         #0D4D3A;
+
+/* Medium teal green — replaces any medium blue used for hover, links, secondary actions */
+--color-primary-hover:   #1A8A6C;
+
+/* Bright mint — replaces any amber/gold/orange used for CTAs, active nav, badges, highlights */
+--color-accent:          #25B897;
+
+/* Very light mint — replaces any light blue tint used for row hover, selected bg, subtle fills */
+--color-accent-light:    #E1F5EE;
+
+/* Page background — replaces any white/off-white page bg with a light green-tinted white */
+--color-bg:              #F5FAF8;
+
+/* Card/panel surface — stays white */
+--color-surface:         #FFFFFF;
+
+/* Secondary surface — replaces any light gray used for sidebar bg, table headers, alt rows */
+--color-surface-alt:     #EDF7F3;
+
+/* Borders — replaces any gray border with a soft green-tinted border */
+--color-border:          #C5E0D8;
+
+/* Primary text — replaces dark gray/near-black headings with darkest green */
+--color-text-primary:    #163D2E;
+
+/* Secondary text — replaces medium gray with muted green */
+--color-text-secondary:  #4A7A68;
+
+/* Muted text — replaces light gray placeholders */
+--color-text-muted:      #8EB5A7;
+
+/* Status colors — keep these */
+--color-success:         #1A8A6C;
+--color-warning:         #E8A940;
+--color-danger:          #C0392B;
+--color-info:            #1A7A8A;
+
+If the project uses Tailwind, add these as custom colors in tailwind.config under `theme.extend.colors`.
+If the project uses a JS/TS theme object, update the object values accordingly.
+If colors are hardcoded as hex values directly in component files, do a global find-and-replace:
+  #1b3a57  →  #0D4D3A
+  #1b6ca8  →  #1A8A6C
+  #f0a500  →  #25B897
+  #2c3e50  →  #163D2E
+  (and any close variations of those hex values)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — LOGIN PAGE BACKGROUND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The login page full-screen background should be #0D4D3A (deep forest green).
+The login card should be white with a subtle green border (#C5E0D8).
+The login button should use #25B897 background with white text.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — SIDEBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Sidebar background: #0D4D3A
+Sidebar text: white (#FFFFFF) at 90% opacity
+Active nav item: background rgba(255,255,255,0.12), right border 3px solid #25B897
+Hover nav item: background rgba(255,255,255,0.07)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Do NOT touch any TypeScript/JavaScript logic
+- Do NOT rename or move any files
+- Do NOT change any component structure or layout
+- Do NOT change fonts
+- ONLY modify color values in CSS/theme files
+- After changes, run the dev server and confirm no errors

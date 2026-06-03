@@ -26,34 +26,43 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const allNav = isAdmin ? [...nav, ...adminNav] : nav;
 
   return (
-    <div className="flex h-screen bg-[#f5f5f5] overflow-hidden" dir="rtl">
+    <div className="flex h-screen overflow-hidden" style={{ background: "#F5FAF8" }} dir="rtl">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "w-60" : "w-14"} flex-shrink-0 bg-[#163D2E] text-white flex flex-col transition-all duration-200 overflow-hidden`}
+        style={{ background: "#0D4D3A", transition: "width 0.2s" }}
+        className={`${sidebarOpen ? "w-64" : "w-14"} flex-shrink-0 text-white flex flex-col overflow-hidden`}
       >
-        {/* Logo */}
-        <div className="bg-[#0D4D3A] px-3 py-2 flex items-center gap-3 border-b border-white/10 min-h-[56px]">
+        {/* Logo area */}
+        <div style={{ background: "#0a3d2d", borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+          className="px-3 py-2 flex items-center gap-3 min-h-[60px]">
           <div className="flex-shrink-0 bg-white rounded-lg p-1">
             <img src="/app/logo.png" alt="لبينات" className="w-8 h-8 object-contain" />
           </div>
           {sidebarOpen && (
             <div className="min-w-0">
-              <div className="font-bold text-xs leading-tight truncate">شركة لبينات العقارية</div>
-              <div className="text-xs text-white/60 truncate">نظام إدارة العقارات</div>
+              <div className="font-bold text-sm leading-tight truncate">شركة لبينات العقارية</div>
+              <div className="text-xs truncate" style={{ color: "#25B897" }}>نظام إدارة العقارات</div>
             </div>
           )}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-3 overflow-y-auto">
+        <nav className="flex-1 py-2 overflow-y-auto">
           {allNav.map(({ href, label, icon: Icon }) => {
             const active = location === href || (href !== "/dashboard" && location.startsWith(href));
             return (
               <button
                 key={href}
                 onClick={() => navigate(href)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-right
-                  ${active ? "bg-[#1A8A6C] text-white" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
+                style={active ? {
+                  background: "rgba(255,255,255,0.12)",
+                  borderRight: "3px solid #25B897",
+                  color: "#fff",
+                } : {
+                  borderRight: "3px solid transparent",
+                  color: "rgba(255,255,255,0.8)",
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-right transition-colors ${!active ? "hover:bg-white/10 hover:text-white" : ""}`}
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 {sidebarOpen && <span>{label}</span>}
@@ -64,10 +73,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         {/* User info */}
         {sidebarOpen && user && (
-          <div className="border-t border-white/10 px-4 py-3">
-            <div className="text-xs text-white/60 mb-1">مرحباً</div>
-            <div className="font-medium text-sm truncate">{user.fullName}</div>
-            <div className="text-xs text-[#25B897] mt-0.5">
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }} className="px-4 py-3">
+            <div className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>مرحباً</div>
+            <div className="font-semibold text-sm truncate">{user.fullName}</div>
+            <div className="text-xs mt-0.5 font-medium" style={{ color: "#25B897" }}>
               {user.role === "ADMIN" ? "مدير النظام" : "مسؤول حسابات"}
             </div>
           </div>
@@ -77,23 +86,23 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Main area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top header */}
-        <header className="bg-[#0D4D3A] text-white flex items-center gap-3 px-4 py-0 min-h-[56px] flex-shrink-0 shadow">
+        <header style={{ background: "#0D4D3A" }}
+          className="text-white flex items-center gap-3 px-4 min-h-[60px] flex-shrink-0 shadow-md">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded transition-colors hover:bg-white/10"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          {/* Brand name in header */}
           <div className="flex items-center gap-2">
             <img src="/app/logo.png" alt="" className="w-7 h-7 object-contain bg-white rounded p-0.5" />
-            <span className="font-bold text-sm hidden sm:inline">نظام إدارة العقارات</span>
+            <span className="font-bold text-sm hidden sm:inline opacity-80">نظام إدارة العقارات</span>
           </div>
 
           {/* Breadcrumb */}
-          <div className="flex items-center gap-1 text-sm text-white/80 mr-2">
-            <span className="text-[#25B897]">الرئيسية</span>
+          <div className="flex items-center gap-1 text-sm text-white/70 mr-2">
+            <span style={{ color: "#25B897" }}>الرئيسية</span>
             <ChevronLeft className="w-3 h-3" />
             <span>{allNav.find(n => location === n.href || location.startsWith(n.href))?.label ?? "لوحة التحكم"}</span>
           </div>
@@ -102,7 +111,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
           <button
             onClick={logout}
-            className="flex items-center gap-2 text-sm text-white/75 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-white/10"
+            className="flex items-center gap-2 text-sm transition-colors px-3 py-1.5 rounded hover:bg-white/10"
+            style={{ color: "rgba(255,255,255,0.75)" }}
           >
             <LogOut className="w-4 h-4" />
             <span>خروج</span>

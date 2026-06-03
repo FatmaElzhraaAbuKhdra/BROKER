@@ -121,7 +121,7 @@ export default function UnitDetails() {
           )}
           {!isSold && (user?.role === "ACCOUNTING" || isAdmin) && (
             <button onClick={() => setShowSaleDialog(true)}
-              className="flex items-center gap-2 bg-[#25B897] text-white px-4 py-2 rounded-md text-sm hover:bg-[#d8940a]">
+              className="flex items-center gap-2 bg-[#25B897] text-white px-4 py-2 rounded-md text-sm hover:bg-[#147A5E]">
               <ShoppingCart className="w-4 h-4" /> تسجيل بيع
             </button>
           )}
@@ -269,7 +269,7 @@ export default function UnitDetails() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={saleLoading}
-                  className="flex-1 bg-[#25B897] text-white py-2 rounded-md font-medium hover:bg-[#d8940a] disabled:opacity-60">
+                  className="flex-1 bg-[#25B897] text-white py-2 rounded-md font-medium hover:bg-[#147A5E] disabled:opacity-60">
                   {saleLoading ? "جارٍ الحفظ..." : "تأكيد البيع"}
                 </button>
                 <button type="button" onClick={() => setShowSaleDialog(false)}

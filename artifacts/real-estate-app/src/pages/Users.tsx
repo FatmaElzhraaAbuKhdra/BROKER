@@ -76,7 +76,7 @@ export default function Users() {
           <tbody>
             {isLoading ? <tr><td colSpan={7} className="text-center py-8 text-gray-400">جارٍ التحميل...</td></tr>
             : users.map((u, i) => (
-              <tr key={u.USER_ID} className={u.USER_ID === me?.userId ? "bg-teal-50" : ""}>
+              <tr key={u.USER_ID} className={u.USER_ID === me?.userId ? "bg-[#E1F5EE]" : ""}>
                 <td className="text-gray-400">{i + 1}</td>
                 <td><span className="font-mono text-sm font-semibold text-[#1A8A6C]">{u.USERNAME}</span>{u.USER_ID === me?.userId && <span className="mr-2 text-xs text-gray-400">(أنت)</span>}</td>
                 <td className="font-medium">{u.FULL_NAME}</td>

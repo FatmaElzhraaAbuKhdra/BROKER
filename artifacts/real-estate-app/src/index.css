@@ -29,50 +29,56 @@
   --radius-lg: var(--radius);
 }
 
-/* لبينات للتطوير العقاري — Teal Brand */
+/* لبينات للتطوير العقاري — Brand Palette */
 :root {
-  --background:       0 0% 96%;
-  --foreground:       0 0% 20%;
-  --border:           161 12% 85%;
-  --input:            161 12% 85%;
-  --ring:             161 67% 32%;   /* #1A8A6C */
-  --card:             0 0% 100%;
-  --card-foreground:  0 0% 20%;
-  --primary:          161 67% 32%;   /* #1A8A6C */
-  --primary-foreground: 0 0% 100%;
-  --secondary:        161 8% 46%;
-  --secondary-foreground: 0 0% 100%;
-  --muted:            0 0% 96%;
-  --muted-foreground: 161 8% 45%;
-  --accent:           161 63% 43%;   /* #25B897 */
-  --accent-foreground: 0 0% 100%;
-  --destructive:      354 70% 54%;   /* #dc3545 */
+  /* Surfaces */
+  --background:             161 30% 97%;   /* #F5FAF8 */
+  --foreground:             161 42% 16%;   /* #163D2E */
+  --border:                 161 28% 83%;   /* #C5E0D8 */
+  --input:                  161 28% 83%;
+  --ring:                   161 67% 32%;   /* #1A8A6C */
+  --card:                   0 0% 100%;
+  --card-foreground:        161 42% 16%;
+  --primary:                161 67% 32%;   /* #1A8A6C */
+  --primary-foreground:     0 0% 100%;
+  --secondary:              161 22% 38%;   /* #4A7A68 */
+  --secondary-foreground:   0 0% 100%;
+  --muted:                  161 30% 95%;   /* #EDF7F3 */
+  --muted-foreground:       161 22% 47%;   /* #4A7A68 */
+  --accent:                 161 63% 43%;   /* #25B897 */
+  --accent-foreground:      0 0% 100%;
+  --destructive:            354 70% 47%;   /* #C0392B */
   --destructive-foreground: 0 0% 100%;
-  --sidebar:          161 42% 16%;   /* #163D2E */
-  --sidebar-foreground: 0 0% 95%;
-  --app-font-sans: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
-  --radius: .375rem;
+  --sidebar:                161 59% 18%;   /* #0D4D3A */
+  --sidebar-foreground:     0 0% 96%;
+  --app-font-sans: 'Tajawal', 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+  --radius: .5rem;
 }
 
 @layer base {
   * { @apply border-border box-border; }
   html, body { direction: rtl; }
-  body { @apply font-sans antialiased bg-background text-foreground; }
+  body {
+    font-family: var(--app-font-sans);
+    font-size: 15px;
+    line-height: 1.7;
+    @apply antialiased bg-background text-foreground;
+  }
 }
 
-/* APEX-style scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
+::-webkit-scrollbar-track { background: #EDF7F3; }
+::-webkit-scrollbar-thumb { background: #25B897; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #1A8A6C; }
 
 /* Status badges */
-.badge-available { @apply bg-green-100 text-green-800 border border-green-300; }
-.badge-sold      { @apply bg-red-100 text-red-800 border border-red-300; }
-.badge-reserved  { @apply bg-yellow-100 text-yellow-800 border border-yellow-300; }
+.badge-available { background: #E1F5EE; color: #1A8A6C; border: 1px solid #25B897; border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 500; }
+.badge-sold      { background: #fce8ea; color: #C0392B; border: 1px solid #e88; border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 500; }
+.badge-reserved  { background: #FFF5E0; color: #b07a10; border: 1px solid #E8A940; border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 500; }
 
-/* APEX table style */
-.apex-table { @apply w-full border-collapse text-sm; }
-.apex-table th { @apply bg-[#0D4D3A] text-white px-4 py-2 text-right font-medium; }
-.apex-table td { @apply px-4 py-2 border-b border-border text-right; }
-.apex-table tr:hover td { @apply bg-teal-50; }
+/* Table style */
+.apex-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.apex-table th { background: #EDF7F3; color: #163D2E; padding: 10px 16px; text-align: right; font-weight: 600; border-bottom: 2px solid #C5E0D8; }
+.apex-table td { padding: 10px 16px; border-bottom: 1px solid #C5E0D8; text-align: right; color: #163D2E; }
+.apex-table tr:hover td { background: #E1F5EE; }
