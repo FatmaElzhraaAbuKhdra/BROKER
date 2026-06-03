@@ -1,40 +1,36 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { api, formatPrice, type Unit, type UnitType } from "@/lib/api";
-import { Plus, Search, Eye, Edit, Home, Maximize2 } from "lucide-react";
-import { toast } from "sonner";
+import { Plus, Search, Eye, Edit, Home, Maximize2, Layers, BedDouble, Bath } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 const STATUS_LABELS: Record<string, string> = { AVAILABLE: "متاح", SOLD: "مباع" };
-const STATUS_CONFIG: Record<string, { border: string; header: string; badge: string; dot: string }> = {
+const STATUS_CONFIG: Record<string, { border: string; header: string; badge: string }> = {
   AVAILABLE: {
     border: "border-emerald-400",
     header: "bg-gradient-to-l from-emerald-600 to-emerald-500",
     badge: "bg-emerald-100 text-emerald-700 border border-emerald-200",
-    dot: "bg-emerald-400",
   },
   SOLD: {
     border: "border-rose-400",
     header: "bg-gradient-to-l from-rose-600 to-rose-500",
     badge: "bg-rose-100 text-rose-700 border border-rose-200",
-    dot: "bg-rose-400",
   },
   RESERVED: {
     border: "border-amber-400",
     header: "bg-gradient-to-l from-amber-500 to-amber-400",
     badge: "bg-amber-100 text-amber-700 border border-amber-200",
-    dot: "bg-amber-400",
   },
 };
 
 export default function Units() {
   const [, navigate] = useLocation();
   const { isAdmin } = useAuth();
-  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("");
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const { data: units = [], isLoading } = useQuery<Unit[]>({
     queryKey: ["units", search, statusFilter, typeFilter],
@@ -105,9 +101,12 @@ export default function Units() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {units.map(unit => {
             const c = cfg(unit.STATUS);
+            const isHovered = hoveredId === unit.UNIT_ID;
             return (
               <div key={unit.UNIT_ID}
-                className={`bg-white rounded-xl shadow-sm border-2 ${c.border} transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 flex flex-col overflow-hidden`}>
+                onMouseEnter={() => setHoveredId(unit.UNIT_ID)}
+                onMouseLeave={() => setHoveredId(null)}
+                className={`bg-white rounded-xl shadow-sm border-2 ${c.border} transition-all duration-200 hover:shadow-lg hover:-translate-y-1 flex flex-col overflow-hidden relative`}>
 
                 {/* Colored header */}
                 <div className={`${c.header} text-white px-4 py-3`}>
@@ -140,6 +139,41 @@ export default function Units() {
                     {formatPrice(unit.PRICE)}
                   </div>
                 </div>
+
+                {/* Hover tooltip — extra details */}
+                {isHovered && (
+                  <div className="absolute inset-x-0 bottom-[56px] bg-[#1b3a57] text-white text-xs rounded-t-lg px-4 py-3 space-y-1.5 z-10 shadow-xl">
+                    <div className="flex items-center gap-2">
+                      <Layers className="w-3.5 h-3.5 text-blue-300 flex-shrink-0" />
+                      <span className="text-white/70">المبنى:</span>
+                      <span className="font-medium">{unit.BUILDING_NAME}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Layers className="w-3.5 h-3.5 text-blue-300 flex-shrink-0" />
+                      <span className="text-white/70">الدور:</span>
+                      <span className="font-medium">{unit.FLOOR_NAME || unit.FLOOR_NUMBER}</span>
+                    </div>
+                    {(unit.ROOMS > 0 || unit.BATHROOMS > 0) && (
+                      <div className="flex gap-4">
+                        {unit.ROOMS > 0 && (
+                          <div className="flex items-center gap-1.5">
+                            <BedDouble className="w-3.5 h-3.5 text-blue-300" />
+                            <span>{unit.ROOMS} غرف</span>
+                          </div>
+                        )}
+                        {unit.BATHROOMS > 0 && (
+                          <div className="flex items-center gap-1.5">
+                            <Bath className="w-3.5 h-3.5 text-blue-300" />
+                            <span>{unit.BATHROOMS} حمامات</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {unit.DESCRIPTION && (
+                      <div className="text-white/60 truncate pt-0.5 border-t border-white/10">{unit.DESCRIPTION}</div>
+                    )}
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="px-4 pb-4 flex gap-2">

@@ -73,6 +73,7 @@ export default function UnitForm() {
         toast.success("تمت إضافة الوحدة");
       }
       qc.invalidateQueries({ queryKey: ["units"] });
+      qc.invalidateQueries({ queryKey: ["unit", id] });
       qc.invalidateQueries({ queryKey: ["dashboard-kpis"] });
       navigate("/units");
     } catch (err) {
