@@ -1,0 +1,115 @@
+Build a full-stack Arabic RTL Real Estate Management System for "Lebanat Real Estate" (شركة لبينات العقارية) using React + Node.js (or Next.js). The interface must be fully RTL (dir="rtl") in Arabic.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BRAND COLOR SYSTEM (from logo)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Use ONLY these colors — derived directly from the Lebanat logo. The palette is calm, natural green inspired by the logo icon.
+
+:root {
+  /* Primary brand greens */
+  --color-primary:        #0D4D3A;   /* deep forest green — sidebar, headers */
+  --color-primary-hover:  #1A8A6C;   /* teal green — hover states, links */
+  --color-accent:         #25B897;   /* light mint green — CTAs, active states, badges */
+  --color-accent-light:   #E1F5EE;   /* near-white mint — table row hover, selected states */
+
+  /* Neutral surface palette */
+  --color-bg:             #F5FAF8;   /* page background — very light green-tinted white */
+  --color-surface:        #FFFFFF;   /* cards, panels, modals */
+  --color-surface-alt:    #EDF7F3;   /* secondary surface — sidebar bg, table header */
+  --color-border:         #C5E0D8;   /* soft green-tinted borders */
+
+  /* Text */
+  --color-text-primary:   #163D2E;   /* darkest green — headings, labels */
+  --color-text-secondary: #4A7A68;   /* muted green — subtitles, meta */
+  --color-text-muted:     #8EB5A7;   /* placeholders, disabled */
+
+  /* Status colors — keep green family tone */
+  --color-success:        #1A8A6C;
+  --color-warning:        #E8A940;   /* warm amber — only for warnings */
+  --color-danger:         #C0392B;   /* only for errors/destructive */
+  --color-info:           #1A7A8A;   /* teal blue — informational */
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPOGRAPHY & LAYOUT RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Font: "Tajawal" (Google Fonts) for all Arabic text — clean, modern, highly legible
+- Body font size: 15px, line-height: 1.7
+- Headings: font-weight 600, color: var(--color-text-primary)
+- Sidebar width: 260px, background: var(--color-primary), text: white
+- Active nav item: background: rgba(255,255,255,0.12), right-border: 3px solid var(--color-accent)
+- Cards: white bg, border: 1px solid var(--color-border), border-radius: 10px, box-shadow: 0 1px 4px rgba(13,77,58,0.07)
+- Buttons (primary): background: var(--color-accent), color: white, border-radius: 8px, no uppercase
+- Buttons (secondary): background: white, border: 1px solid var(--color-border), color: var(--color-primary)
+- Table header: background: var(--color-surface-alt), color: var(--color-text-primary)
+- Table row hover: background: var(--color-accent-light)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGES & FEATURES REQUIRED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. LOGIN PAGE (صفحة تسجيل الدخول)
+   - Centered card on dark green background (#0D4D3A)
+   - Logo placeholder + company name "شركة لبينات العقارية"
+   - Subtitle: "نظام إدارة العقارات"
+   - Username field (اسم المستخدم) + Password field (كلمة المرور)
+   - Login button (تسجيل الدخول) in accent green
+   - Demo credentials shown below card
+   - RTL layout
+
+2. DASHBOARD (لوحة التحكم)
+   - 4 stat cards: إجمالي العقارات / الوحدات المتاحة / العقود النشطة / إجمالي الإيرادات
+   - Charts: bar chart for monthly revenue, pie chart for unit status
+   - Latest contracts table (آخر العقود)
+   - Quick action buttons
+
+3. PROPERTIES (إدارة العقارات)
+   - Data table with: اسم العقار / الموقع / النوع / عدد الوحدات / الحالة
+   - Add/Edit/Delete CRUD
+   - Filter by type (سكني / تجاري / إداري)
+   - Property types: apartments, villas, offices, shops
+
+4. UNITS (الوحدات)
+   - Each unit linked to a property
+   - Fields: رقم الوحدة / الطابق / المساحة / الإيجار / الحالة (متاح / مؤجر / صيانة)
+   - Status badge colors: متاح=accent green / مؤجر=warning amber / صيانة=muted
+
+5. TENANTS (المستأجرون)
+   - Full CRUD: الاسم / الجنسية / رقم الهوية / الهاتف / البريد الإلكتروني
+   - Linked to active contracts
+
+6. CONTRACTS (العقود)
+   - Fields: رقم العقد / المستأجر / الوحدة / تاريخ البداية / تاريخ النهاية / الإيجار الشهري / الحالة
+   - Status: نشط (active) / منتهي (expired) / قيد التجديد (renewal)
+   - Printable contract summary
+
+7. PAYMENTS (المدفوعات)
+   - Payment tracking per contract
+   - Fields: التاريخ / المبلغ / طريقة الدفع / الحالة (مدفوع / معلق / متأخر)
+   - Late payment highlight in danger red
+
+8. REPORTS (التقارير)
+   - Occupancy rate chart
+   - Revenue by property
+   - Expiring contracts in next 30/60/90 days
+   - Export to PDF button
+
+9. SETTINGS (الإعدادات)
+   - Company info, user management, notification preferences
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TECH REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- React 18 + React Router v6 for SPA navigation
+- Recharts for all charts
+- React Hook Form for all forms
+- Mock data (no real DB needed — use JSON/localStorage)
+- Lucide React or Tabler Icons for icons
+- Axios or fetch for simulated API calls
+- Responsive: works on 1280px+ screens (desktop management system)
+- No Tailwind — use CSS modules or styled-components with the custom variables above
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DESIGN FEEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Think: calm, professional, trustworthy. The green palette should feel like nature and stability — not loud or corporate. Avoid heavy shadows. Use generous whitespace. The sidebar is the only dark element; everything else is light and airy. Tables should breathe. Forms should feel simple. This is a tool people use 8 hours a day — comfort over flair.
