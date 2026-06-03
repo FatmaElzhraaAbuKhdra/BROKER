@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/app/"
-title = "نظام إدارة العقارات"
+title = "شركة لبينات العقارية"
 version = "1.0.0"
 id = "artifacts/real-estate-app"
 router = "path"

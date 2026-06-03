@@ -55,10 +55,10 @@ export default function Units() {
     <div dir="rtl" className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-[#1b3a57]">الوحدات العقارية</h1>
+        <h1 className="text-xl font-bold text-[#0D4D3A]">الوحدات العقارية</h1>
         {isAdmin && (
           <button onClick={() => navigate("/units/new")}
-            className="flex items-center gap-2 bg-[#1b6ca8] text-white px-4 py-2 rounded-md text-sm hover:bg-[#15598d] transition-colors">
+            className="flex items-center gap-2 bg-[#1A8A6C] text-white px-4 py-2 rounded-md text-sm hover:bg-[#147A5E] transition-colors">
             <Plus className="w-4 h-4" /> إضافة وحدة
           </button>
         )}
@@ -70,16 +70,16 @@ export default function Units() {
           <Search className="absolute top-2.5 right-3 w-4 h-4 text-gray-400" />
           <input type="text" placeholder="بحث بالكود أو الاسم..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]" />
+            className="w-full pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" />
         </div>
         {["ALL", "AVAILABLE", "SOLD"].map(s => (
           <button key={s} onClick={() => setStatusFilter(s)}
-            className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${statusFilter === s ? "bg-[#1b6ca8] text-white border-[#1b6ca8]" : "border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
+            className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${statusFilter === s ? "bg-[#1A8A6C] text-white border-[#1A8A6C]" : "border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
             {s === "ALL" ? "الكل" : STATUS_LABELS[s]}
           </button>
         ))}
         <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]">
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]">
           <option value="">جميع الأنواع</option>
           {types.map(t => <option key={t.TYPE_ID} value={t.TYPE_ID}>{t.TYPE_NAME}</option>)}
         </select>
@@ -88,7 +88,7 @@ export default function Units() {
       {/* Summary count */}
       {!isLoading && (
         <div className="text-sm text-gray-500">
-          إجمالي: <span className="font-semibold text-[#1b3a57]">{units.length}</span> وحدة
+          إجمالي: <span className="font-semibold text-[#0D4D3A]">{units.length}</span> وحدة
         </div>
       )}
 
@@ -135,14 +135,14 @@ export default function Units() {
                     )}
                   </div>
                   <div className="text-xs text-gray-400 truncate">{unit.PROJECT_NAME} · {unit.FLOOR_NAME || unit.FLOOR_NUMBER}</div>
-                  <div className="text-[#1b6ca8] font-bold text-base pt-1 border-t border-gray-100">
+                  <div className="text-[#1A8A6C] font-bold text-base pt-1 border-t border-gray-100">
                     {formatPrice(unit.PRICE)}
                   </div>
                 </div>
 
                 {/* Hover tooltip — extra details */}
                 {isHovered && (
-                  <div className="absolute inset-x-0 bottom-[56px] bg-[#1b3a57] text-white text-xs rounded-t-lg px-4 py-3 space-y-1.5 z-10 shadow-xl">
+                  <div className="absolute inset-x-0 bottom-[56px] bg-[#0D4D3A] text-white text-xs rounded-t-lg px-4 py-3 space-y-1.5 z-10 shadow-xl">
                     <div className="flex items-center gap-2">
                       <Layers className="w-3.5 h-3.5 text-blue-300 flex-shrink-0" />
                       <span className="text-white/70">المبنى:</span>
@@ -178,7 +178,7 @@ export default function Units() {
                 {/* Actions */}
                 <div className="px-4 pb-4 flex gap-2">
                   <button onClick={() => navigate(`/units/${unit.UNIT_ID}`)}
-                    className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 border border-[#1b6ca8] text-[#1b6ca8] rounded-lg hover:bg-[#1b6ca8] hover:text-white transition-colors font-medium">
+                    className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 border border-[#1A8A6C] text-[#1A8A6C] rounded-lg hover:bg-[#1A8A6C] hover:text-white transition-colors font-medium">
                     <Eye className="w-3.5 h-3.5" /> عرض
                   </button>
                   {isAdmin && unit.STATUS !== "SOLD" && (

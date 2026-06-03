@@ -29,15 +29,17 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <div className="flex h-screen bg-[#f5f5f5] overflow-hidden" dir="rtl">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "w-60" : "w-14"} flex-shrink-0 bg-[#2c3e50] text-white flex flex-col transition-all duration-200 overflow-hidden`}
+        className={`${sidebarOpen ? "w-60" : "w-14"} flex-shrink-0 bg-[#163D2E] text-white flex flex-col transition-all duration-200 overflow-hidden`}
       >
         {/* Logo */}
-        <div className="bg-[#1b3a57] px-4 py-3 flex items-center gap-3 border-b border-white/10 min-h-[56px]">
-          <Building2 className="w-6 h-6 text-[#f0a500] flex-shrink-0" />
+        <div className="bg-[#0D4D3A] px-3 py-2 flex items-center gap-3 border-b border-white/10 min-h-[56px]">
+          <div className="flex-shrink-0 bg-white rounded-lg p-1">
+            <img src="/app/logo.png" alt="لبينات" className="w-8 h-8 object-contain" />
+          </div>
           {sidebarOpen && (
-            <div>
-              <div className="font-bold text-sm leading-tight">نظام إدارة العقارات</div>
-              <div className="text-xs text-white/60">Real Estate System</div>
+            <div className="min-w-0">
+              <div className="font-bold text-xs leading-tight truncate">شركة لبينات العقارية</div>
+              <div className="text-xs text-white/60 truncate">نظام إدارة العقارات</div>
             </div>
           )}
         </div>
@@ -51,7 +53,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 key={href}
                 onClick={() => navigate(href)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-right
-                  ${active ? "bg-[#1b6ca8] text-white" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
+                  ${active ? "bg-[#1A8A6C] text-white" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 {sidebarOpen && <span>{label}</span>}
@@ -65,7 +67,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <div className="border-t border-white/10 px-4 py-3">
             <div className="text-xs text-white/60 mb-1">مرحباً</div>
             <div className="font-medium text-sm truncate">{user.fullName}</div>
-            <div className="text-xs text-[#f0a500] mt-0.5">
+            <div className="text-xs text-[#25B897] mt-0.5">
               {user.role === "ADMIN" ? "مدير النظام" : "مسؤول حسابات"}
             </div>
           </div>
@@ -75,7 +77,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Main area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top header */}
-        <header className="bg-[#1b3a57] text-white flex items-center gap-3 px-4 py-0 min-h-[56px] flex-shrink-0 shadow">
+        <header className="bg-[#0D4D3A] text-white flex items-center gap-3 px-4 py-0 min-h-[56px] flex-shrink-0 shadow">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1.5 rounded hover:bg-white/10 transition-colors"
@@ -83,9 +85,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
+          {/* Brand name in header */}
+          <div className="flex items-center gap-2">
+            <img src="/app/logo.png" alt="" className="w-7 h-7 object-contain bg-white rounded p-0.5" />
+            <span className="font-bold text-sm hidden sm:inline">نظام إدارة العقارات</span>
+          </div>
+
           {/* Breadcrumb */}
-          <div className="flex items-center gap-1 text-sm text-white/80">
-            <span className="text-[#f0a500]">الرئيسية</span>
+          <div className="flex items-center gap-1 text-sm text-white/80 mr-2">
+            <span className="text-[#25B897]">الرئيسية</span>
             <ChevronLeft className="w-3 h-3" />
             <span>{allNav.find(n => location === n.href || location.startsWith(n.href))?.label ?? "لوحة التحكم"}</span>
           </div>

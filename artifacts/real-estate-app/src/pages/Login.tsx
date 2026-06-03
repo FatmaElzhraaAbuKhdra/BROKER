@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
-import { Building2, User, Lock } from "lucide-react";
+import { User, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Login() {
@@ -29,16 +29,16 @@ export default function Login() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-b from-[#1b3a57] to-[#2c3e50] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden">
+    <div dir="rtl" className="min-h-screen bg-gradient-to-b from-[#0D4D3A] to-[#163D2E] flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
-        <div className="bg-[#1b3a57] text-white p-6 text-center border-b-4 border-[#0d7a8a]">
-          <div className="flex justify-center mb-3">
-            <div className="bg-white/10 p-3 rounded-full">
-              <Building2 className="w-10 h-10 text-[#f0a500]" />
+        <div className="bg-[#0D4D3A] text-white p-6 text-center border-b-4 border-[#25B897]">
+          <div className="flex justify-center mb-4">
+            <div className="bg-white rounded-xl p-3 shadow-lg">
+              <img src="/app/logo.png" alt="لبينات للتطوير العقاري" className="w-20 h-20 object-contain" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold mb-1">شركة العقارات</h1>
+          <h1 className="text-xl font-bold mb-1">شركة لبينات العقارية</h1>
           <span className="text-xs bg-white/20 px-3 py-1 rounded-full">نظام إدارة العقارات</span>
         </div>
 
@@ -51,7 +51,7 @@ export default function Login() {
               <input
                 type="text" value={username} onChange={e => setUsername(e.target.value)}
                 placeholder="أدخل اسم المستخدم"
-                className="w-full pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]"
+                className="w-full pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]"
               />
             </div>
           </div>
@@ -62,13 +62,13 @@ export default function Login() {
               <input
                 type="password" value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="أدخل كلمة المرور"
-                className="w-full pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]"
+                className="w-full pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]"
               />
             </div>
           </div>
           <button
             type="submit" disabled={loading}
-            className="w-full bg-[#1b6ca8] hover:bg-[#15598d] text-white py-2.5 rounded-md font-medium transition-colors disabled:opacity-60"
+            className="w-full bg-[#1A8A6C] hover:bg-[#147A5E] text-white py-2.5 rounded-md font-medium transition-colors disabled:opacity-60"
           >
             {loading ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
           </button>

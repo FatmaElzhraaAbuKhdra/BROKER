@@ -29,26 +29,26 @@
   --radius-lg: var(--radius);
 }
 
-/* Oracle APEX Universal Theme Colors */
+/* لبينات للتطوير العقاري — Teal Brand */
 :root {
-  --background:       0 0% 96%;      /* #f5f5f5 page bg */
-  --foreground:       0 0% 20%;      /* #333333 text */
-  --border:           208 15% 87%;   /* #dde2e6 */
-  --input:            208 15% 87%;
-  --ring:             210 72% 38%;   /* #1b6ca8 */
+  --background:       0 0% 96%;
+  --foreground:       0 0% 20%;
+  --border:           161 12% 85%;
+  --input:            161 12% 85%;
+  --ring:             161 67% 32%;   /* #1A8A6C */
   --card:             0 0% 100%;
   --card-foreground:  0 0% 20%;
-  --primary:          210 72% 38%;   /* #1b6ca8 APEX blue */
+  --primary:          161 67% 32%;   /* #1A8A6C */
   --primary-foreground: 0 0% 100%;
-  --secondary:        208 7% 46%;    /* #6c757d */
+  --secondary:        161 8% 46%;
   --secondary-foreground: 0 0% 100%;
   --muted:            0 0% 96%;
-  --muted-foreground: 210 9% 45%;
-  --accent:           39 100% 47%;   /* #f0a500 orange */
+  --muted-foreground: 161 8% 45%;
+  --accent:           161 63% 43%;   /* #25B897 */
   --accent-foreground: 0 0% 100%;
   --destructive:      354 70% 54%;   /* #dc3545 */
   --destructive-foreground: 0 0% 100%;
-  --sidebar:          210 29% 24%;   /* #2c3e50 */
+  --sidebar:          161 42% 16%;   /* #163D2E */
   --sidebar-foreground: 0 0% 95%;
   --app-font-sans: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
   --radius: .375rem;
@@ -73,6 +73,6 @@
 
 /* APEX table style */
 .apex-table { @apply w-full border-collapse text-sm; }
-.apex-table th { @apply bg-[#1b3a57] text-white px-4 py-2 text-right font-medium; }
+.apex-table th { @apply bg-[#0D4D3A] text-white px-4 py-2 text-right font-medium; }
 .apex-table td { @apply px-4 py-2 border-b border-border text-right; }
-.apex-table tr:hover td { @apply bg-blue-50; }
+.apex-table tr:hover td { @apply bg-teal-50; }

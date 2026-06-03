@@ -90,12 +90,12 @@ export default function UnitForm() {
     </div>
   );
 
-  const inputClass = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]";
+  const inputClass = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]";
 
   return (
     <div dir="rtl" className="space-y-4">
       <div className="flex items-center gap-2">
-        <button onClick={() => navigate("/units")} className="text-[#1b6ca8] hover:underline flex items-center gap-1 text-sm">
+        <button onClick={() => navigate("/units")} className="text-[#1A8A6C] hover:underline flex items-center gap-1 text-sm">
           <ArrowRight className="w-4 h-4" /> الوحدات
         </button>
         <span className="text-gray-400">/</span>
@@ -103,7 +103,7 @@ export default function UnitForm() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h1 className="text-xl font-bold text-[#1b3a57] mb-6">{isEdit ? "تعديل الوحدة" : "إضافة وحدة جديدة"}</h1>
+        <h1 className="text-xl font-bold text-[#0D4D3A] mb-6">{isEdit ? "تعديل الوحدة" : "إضافة وحدة جديدة"}</h1>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <F label="كود الوحدة" required><input className={inputClass} value={form.unitCode} onChange={set("unitCode")} placeholder="AND-A-101" /></F>
           <F label="اسم الوحدة" required><input className={inputClass} value={form.unitName} onChange={set("unitName")} placeholder="شقة 101 - مبنى A" /></F>
@@ -143,7 +143,7 @@ export default function UnitForm() {
           </div>
           <div className="md:col-span-2 flex gap-3 pt-4 border-t">
             <button type="submit" disabled={loading}
-              className="flex items-center gap-2 bg-[#1b6ca8] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#15598d] disabled:opacity-60">
+              className="flex items-center gap-2 bg-[#1A8A6C] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#147A5E] disabled:opacity-60">
               <Save className="w-4 h-4" />{loading ? "جارٍ الحفظ..." : "حفظ"}
             </button>
             <button type="button" onClick={() => navigate("/units")}

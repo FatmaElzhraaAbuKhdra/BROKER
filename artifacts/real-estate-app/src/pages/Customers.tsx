@@ -43,16 +43,16 @@ export default function Customers() {
   };
 
   const s = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm(f => ({ ...f, [k]: e.target.value }));
-  const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]";
+  const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]";
 
   return (
     <div dir="rtl" className="space-y-4">
       {/* KPI summary */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "إجمالي العملاء", value: customers.length, icon: Users, color: "#1b6ca8", bg: "#e8f0f8" },
+          { label: "إجمالي العملاء", value: customers.length, icon: Users, color: "#1A8A6C", bg: "#e8f0f8" },
           { label: "عملاء لديهم هاتف", value: customers.filter(c => c.MOBILE).length, icon: Phone, color: "#2e7d32", bg: "#e8f5e9" },
-          { label: "عملاء مسجلون", value: customers.filter(c => c.NATIONAL_ID).length, icon: UserCheck, color: "#f0a500", bg: "#fff8e1" },
+          { label: "عملاء مسجلون", value: customers.filter(c => c.NATIONAL_ID).length, icon: UserCheck, color: "#25B897", bg: "#fff8e1" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="bg-white rounded-lg border shadow-sm p-4 flex items-center gap-3">
             <div className="rounded-full p-2.5" style={{ background: bg }}><Icon className="w-5 h-5" style={{ color }} /></div>
@@ -62,10 +62,10 @@ export default function Customers() {
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-xl font-bold text-[#1b3a57]">العملاء</h1>
+        <h1 className="text-xl font-bold text-[#0D4D3A]">العملاء</h1>
         <div className="flex items-center gap-3">
-          <div className="relative"><Search className="absolute top-2.5 right-3 w-4 h-4 text-gray-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث بالاسم أو الجوال..." className="pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]" /></div>
-          <button onClick={openAdd} className="flex items-center gap-2 bg-[#1b6ca8] text-white px-4 py-2 rounded-md text-sm hover:bg-[#15598d]"><Plus className="w-4 h-4" /> إضافة</button>
+          <div className="relative"><Search className="absolute top-2.5 right-3 w-4 h-4 text-gray-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث بالاسم أو الجوال..." className="pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" /></div>
+          <button onClick={openAdd} className="flex items-center gap-2 bg-[#1A8A6C] text-white px-4 py-2 rounded-md text-sm hover:bg-[#147A5E]"><Plus className="w-4 h-4" /> إضافة</button>
         </div>
       </div>
 
@@ -77,13 +77,13 @@ export default function Customers() {
             : customers.map((c, i) => (
               <tr key={c.CUSTOMER_ID}>
                 <td className="text-gray-400">{i + 1}</td>
-                <td className="font-medium text-[#1b3a57]">{c.FULL_NAME}</td>
+                <td className="font-medium text-[#0D4D3A]">{c.FULL_NAME}</td>
                 <td className="font-mono text-sm">{c.MOBILE}</td>
                 <td className="text-gray-600">{c.EMAIL || "-"}</td>
                 <td className="font-mono text-xs text-gray-500">{c.NATIONAL_ID || "-"}</td>
                 <td className="text-gray-500">{formatDate(c.CREATED_DATE)}</td>
                 <td><div className="flex gap-2">
-                  <button onClick={() => openEdit(c)} className="text-xs border border-[#1b6ca8] text-[#1b6ca8] px-2 py-1 rounded hover:bg-[#1b6ca8] hover:text-white transition-colors"><Edit className="w-3 h-3 inline ml-1" />تعديل</button>
+                  <button onClick={() => openEdit(c)} className="text-xs border border-[#1A8A6C] text-[#1A8A6C] px-2 py-1 rounded hover:bg-[#1A8A6C] hover:text-white transition-colors"><Edit className="w-3 h-3 inline ml-1" />تعديل</button>
                   {isAdmin && <button onClick={() => handleDelete(c)} className="text-xs border border-red-400 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"><Trash2 className="w-3 h-3 inline ml-1" />حذف</button>}
                 </div></td>
               </tr>
@@ -95,7 +95,7 @@ export default function Customers() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-            <div className="bg-[#1b3a57] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
+            <div className="bg-[#0D4D3A] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
               <span className="font-semibold">{editing ? "تعديل العميل" : "إضافة عميل"}</span>
               <button onClick={() => setShowModal(false)}><X className="w-5 h-5" /></button>
             </div>
@@ -107,7 +107,7 @@ export default function Customers() {
               <div><label className="text-sm font-medium block mb-1">العنوان</label><input className={ic} value={form.address} onChange={s("address")} /></div>
               <div className="col-span-2"><label className="text-sm font-medium block mb-1">ملاحظات</label><textarea className={ic} value={form.notes} onChange={s("notes")} rows={2} /></div>
               <div className="col-span-2 flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1b6ca8] text-white py-2 rounded-md font-medium hover:bg-[#15598d] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
+                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1A8A6C] text-white py-2 rounded-md font-medium hover:bg-[#147A5E] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-md hover:bg-gray-50">إلغاء</button>
               </div>
             </form>

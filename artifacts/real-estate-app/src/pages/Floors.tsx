@@ -55,13 +55,13 @@ export default function Floors() {
   };
 
   const s = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setForm(f => ({ ...f, [k]: e.target.value }));
-  const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]";
+  const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]";
 
   return (
     <div dir="rtl" className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-[#1b3a57]">الأدوار</h1>
-        {isAdmin && <button onClick={openAdd} className="flex items-center gap-2 bg-[#1b6ca8] text-white px-4 py-2 rounded-md text-sm hover:bg-[#15598d]"><Plus className="w-4 h-4" /> إضافة</button>}
+        <h1 className="text-xl font-bold text-[#0D4D3A]">الأدوار</h1>
+        {isAdmin && <button onClick={openAdd} className="flex items-center gap-2 bg-[#1A8A6C] text-white px-4 py-2 rounded-md text-sm hover:bg-[#147A5E]"><Plus className="w-4 h-4" /> إضافة</button>}
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -73,7 +73,7 @@ export default function Floors() {
               <tr key={f.FLOOR_ID}>
                 <td className="text-gray-400">{i + 1}</td>
                 <td><span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{f.FLOOR_NUMBER}</span></td>
-                <td className="font-medium text-[#1b3a57]">{f.FLOOR_NAME || "-"}</td>
+                <td className="font-medium text-[#0D4D3A]">{f.FLOOR_NAME || "-"}</td>
                 <td>
                   {f.FLOOR_TYPE ? (
                     <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">
@@ -84,7 +84,7 @@ export default function Floors() {
                 <td className="text-gray-600">{f.BUILDING_NAME}</td>
                 <td className="text-gray-500">{f.PROJECT_NAME}</td>
                 {isAdmin && <td><div className="flex gap-2">
-                  <button onClick={() => openEdit(f)} className="text-xs border border-[#1b6ca8] text-[#1b6ca8] px-2 py-1 rounded hover:bg-[#1b6ca8] hover:text-white transition-colors"><Edit className="w-3 h-3 inline ml-1" />تعديل</button>
+                  <button onClick={() => openEdit(f)} className="text-xs border border-[#1A8A6C] text-[#1A8A6C] px-2 py-1 rounded hover:bg-[#1A8A6C] hover:text-white transition-colors"><Edit className="w-3 h-3 inline ml-1" />تعديل</button>
                   <button onClick={() => handleDelete(f)} className="text-xs border border-red-400 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"><Trash2 className="w-3 h-3 inline ml-1" />حذف</button>
                 </div></td>}
               </tr>
@@ -96,7 +96,7 @@ export default function Floors() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="bg-[#1b3a57] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
+            <div className="bg-[#0D4D3A] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
               <span className="font-semibold">{editing ? "تعديل الطابق" : "إضافة طابق"}</span>
               <button onClick={() => setShowModal(false)}><X className="w-5 h-5" /></button>
             </div>
@@ -113,7 +113,7 @@ export default function Floors() {
               </div>
               <div><label className="text-sm font-medium block mb-1">الوصف</label><textarea className={ic} value={form.description} onChange={s("description")} rows={2} /></div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1b6ca8] text-white py-2 rounded-md font-medium hover:bg-[#15598d] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
+                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1A8A6C] text-white py-2 rounded-md font-medium hover:bg-[#147A5E] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-md hover:bg-gray-50">إلغاء</button>
               </div>
             </form>

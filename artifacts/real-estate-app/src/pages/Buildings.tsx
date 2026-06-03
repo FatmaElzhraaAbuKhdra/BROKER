@@ -61,15 +61,15 @@ export default function Buildings() {
   };
 
   const s = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setForm(f => ({ ...f, [k]: e.target.value }));
-  const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]";
+  const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]";
 
   return (
     <div dir="rtl" className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-xl font-bold text-[#1b3a57]">المباني</h1>
+        <h1 className="text-xl font-bold text-[#0D4D3A]">المباني</h1>
         <div className="flex items-center gap-3">
-          <div className="relative"><Search className="absolute top-2.5 right-3 w-4 h-4 text-gray-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث..." className="pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]" /></div>
-          {isAdmin && <button onClick={openAdd} className="flex items-center gap-2 bg-[#1b6ca8] text-white px-4 py-2 rounded-md text-sm hover:bg-[#15598d]"><Plus className="w-4 h-4" /> إضافة</button>}
+          <div className="relative"><Search className="absolute top-2.5 right-3 w-4 h-4 text-gray-400" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث..." className="pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" /></div>
+          {isAdmin && <button onClick={openAdd} className="flex items-center gap-2 bg-[#1A8A6C] text-white px-4 py-2 rounded-md text-sm hover:bg-[#147A5E]"><Plus className="w-4 h-4" /> إضافة</button>}
         </div>
       </div>
 
@@ -81,13 +81,13 @@ export default function Buildings() {
             : filtered.map((b, i) => (
               <tr key={b.BUILDING_ID}>
                 <td className="text-gray-400">{i + 1}</td>
-                <td className="font-medium text-[#1b3a57]">{b.BUILDING_NAME}</td>
+                <td className="font-medium text-[#0D4D3A]">{b.BUILDING_NAME}</td>
                 <td className="font-mono text-xs text-gray-500">{b.BUILDING_CODE || "-"}</td>
                 <td className="text-gray-600">{b.PROJECT_NAME}</td>
                 <td>
                   <div className="flex items-center gap-2">
                     <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-2 bg-[#1b6ca8] rounded-full" style={{ width: `${Math.min(100, (b.FLOORS_COUNT / 30) * 100)}%` }} />
+                      <div className="h-2 bg-[#1A8A6C] rounded-full" style={{ width: `${Math.min(100, (b.FLOORS_COUNT / 30) * 100)}%` }} />
                     </div>
                     <span className="text-sm">{b.FLOORS_COUNT}</span>
                   </div>
@@ -95,7 +95,7 @@ export default function Buildings() {
                 <td className="text-gray-700 font-mono">{b.LAND_AREA != null ? Number(b.LAND_AREA).toLocaleString("ar-SA") : <span className="text-gray-300">-</span>}</td>
                 <td className="text-gray-700 font-mono">{b.TOTAL_SALEABLE_AREA != null ? Number(b.TOTAL_SALEABLE_AREA).toLocaleString("ar-SA") : <span className="text-gray-300">-</span>}</td>
                 {isAdmin && <td><div className="flex gap-2">
-                  <button onClick={() => openEdit(b)} className="text-xs border border-[#1b6ca8] text-[#1b6ca8] px-2 py-1 rounded hover:bg-[#1b6ca8] hover:text-white transition-colors"><Edit className="w-3 h-3 inline ml-1" />تعديل</button>
+                  <button onClick={() => openEdit(b)} className="text-xs border border-[#1A8A6C] text-[#1A8A6C] px-2 py-1 rounded hover:bg-[#1A8A6C] hover:text-white transition-colors"><Edit className="w-3 h-3 inline ml-1" />تعديل</button>
                   <button onClick={() => handleDelete(b)} className="text-xs border border-red-400 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"><Trash2 className="w-3 h-3 inline ml-1" />حذف</button>
                 </div></td>}
               </tr>
@@ -107,7 +107,7 @@ export default function Buildings() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="bg-[#1b3a57] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
+            <div className="bg-[#0D4D3A] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
               <span className="font-semibold">{editing ? "تعديل المبنى" : "إضافة مبنى"}</span>
               <button onClick={() => setShowModal(false)}><X className="w-5 h-5" /></button>
             </div>
@@ -122,7 +122,7 @@ export default function Buildings() {
               </div>
               <div><label className="text-sm font-medium block mb-1">الوصف</label><textarea className={ic} value={form.description} onChange={s("description")} rows={2} /></div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1b6ca8] text-white py-2 rounded-md font-medium hover:bg-[#15598d] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
+                <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-[#1A8A6C] text-white py-2 rounded-md font-medium hover:bg-[#147A5E] disabled:opacity-60"><Save className="w-4 h-4" />{loading ? "..." : "حفظ"}</button>
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-md hover:bg-gray-50">إلغاء</button>
               </div>
             </form>

@@ -107,7 +107,7 @@ export default function UnitDetails() {
       {/* Breadcrumb + actions */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate("/units")} className="text-[#1b6ca8] hover:underline flex items-center gap-1 text-sm">
+          <button onClick={() => navigate("/units")} className="text-[#1A8A6C] hover:underline flex items-center gap-1 text-sm">
             <ArrowRight className="w-4 h-4" /> الوحدات
           </button>
           <span className="text-gray-400">/</span>
@@ -121,14 +121,14 @@ export default function UnitDetails() {
           )}
           {!isSold && (user?.role === "ACCOUNTING" || isAdmin) && (
             <button onClick={() => setShowSaleDialog(true)}
-              className="flex items-center gap-2 bg-[#f0a500] text-white px-4 py-2 rounded-md text-sm hover:bg-[#d8940a]">
+              className="flex items-center gap-2 bg-[#25B897] text-white px-4 py-2 rounded-md text-sm hover:bg-[#d8940a]">
               <ShoppingCart className="w-4 h-4" /> تسجيل بيع
             </button>
           )}
           {isAdmin && !isSold && (
             <>
               <button onClick={() => navigate(`/units/${unit.UNIT_ID}/edit`)}
-                className="flex items-center gap-2 bg-[#1b6ca8] text-white px-4 py-2 rounded-md text-sm hover:bg-[#15598d]">
+                className="flex items-center gap-2 bg-[#1A8A6C] text-white px-4 py-2 rounded-md text-sm hover:bg-[#147A5E]">
                 <Edit className="w-4 h-4" /> تعديل
               </button>
               <button onClick={handleDelete}
@@ -146,7 +146,7 @@ export default function UnitDetails() {
           <div className="bg-white rounded-lg shadow-sm border p-5">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h1 className="text-xl font-bold text-[#1b3a57]">{unit.UNIT_NAME}</h1>
+                <h1 className="text-xl font-bold text-[#0D4D3A]">{unit.UNIT_NAME}</h1>
                 <div className="font-mono text-sm text-gray-500 mt-1">{unit.UNIT_CODE}</div>
               </div>
               <span className={`text-sm px-3 py-1 rounded-full border font-medium
@@ -170,7 +170,7 @@ export default function UnitDetails() {
               ].map(([label, value]) => (
                 <div key={label} className="border-b border-gray-100 pb-2">
                   <div className="text-xs text-gray-500 mb-0.5">{label}</div>
-                  <div className="font-medium text-[#1b3a57]">{value}</div>
+                  <div className="font-medium text-[#0D4D3A]">{value}</div>
                 </div>
               ))}
             </div>
@@ -188,10 +188,10 @@ export default function UnitDetails() {
         <div className="space-y-3">
           <div className="bg-white rounded-lg shadow-sm border p-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold text-[#1b3a57] text-sm">
+              <h2 className="font-semibold text-[#0D4D3A] text-sm">
                 الصور ({unit.IMAGES?.length ?? 0})
               </h2>
-              <label className="cursor-pointer flex items-center gap-1 text-xs bg-[#1b6ca8] text-white px-2.5 py-1.5 rounded hover:bg-[#15598d]">
+              <label className="cursor-pointer flex items-center gap-1 text-xs bg-[#1A8A6C] text-white px-2.5 py-1.5 rounded hover:bg-[#147A5E]">
                 <Upload className="w-3 h-3" />
                 {uploadLoading ? "جارٍ الرفع..." : "رفع صور"}
                 <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadLoading} />
@@ -212,12 +212,12 @@ export default function UnitDetails() {
                       className="w-full h-24 object-cover"
                     />
                     {img.IS_PRIMARY === 1 && (
-                      <div className="absolute top-1 right-1 bg-[#f0a500] text-white text-xs px-1.5 py-0.5 rounded">رئيسية</div>
+                      <div className="absolute top-1 right-1 bg-[#25B897] text-white text-xs px-1.5 py-0.5 rounded">رئيسية</div>
                     )}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                       {img.IS_PRIMARY !== 1 && (
                         <button onClick={() => handleSetPrimary(img.IMAGE_ID)}
-                          className="p-1 bg-[#f0a500] text-white rounded text-xs" title="تعيين كرئيسية">
+                          className="p-1 bg-[#25B897] text-white rounded text-xs" title="تعيين كرئيسية">
                           <Star className="w-3 h-3" />
                         </button>
                       )}
@@ -238,7 +238,7 @@ export default function UnitDetails() {
       {showSaleDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="bg-[#1b3a57] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
+            <div className="bg-[#0D4D3A] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
               <span className="font-semibold">تسجيل عملية بيع - {unit.UNIT_NAME}</span>
               <button onClick={() => setShowSaleDialog(false)} className="hover:text-white/70"><X className="w-5 h-5" /></button>
             </div>
@@ -246,7 +246,7 @@ export default function UnitDetails() {
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">العميل *</label>
                 <select value={saleForm.customerId} onChange={e => setSaleForm(s => ({ ...s, customerId: e.target.value }))} required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]">
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]">
                   <option value="">-- اختر العميل --</option>
                   {customers.map(c => <option key={c.CUSTOMER_ID} value={c.CUSTOMER_ID}>{c.FULL_NAME} - {c.MOBILE}</option>)}
                 </select>
@@ -254,22 +254,22 @@ export default function UnitDetails() {
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">تاريخ البيع *</label>
                 <input type="date" value={saleForm.saleDate} onChange={e => setSaleForm(s => ({ ...s, saleDate: e.target.value }))} required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]" />
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">مبلغ البيع *</label>
                 <input type="number" value={saleForm.saleAmount} onChange={e => setSaleForm(s => ({ ...s, saleAmount: e.target.value }))}
                   placeholder={String(unit.PRICE)} required min={1}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]" />
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">ملاحظات</label>
                 <textarea value={saleForm.notes} onChange={e => setSaleForm(s => ({ ...s, notes: e.target.value }))} rows={2}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1b6ca8]" />
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" />
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={saleLoading}
-                  className="flex-1 bg-[#f0a500] text-white py-2 rounded-md font-medium hover:bg-[#d8940a] disabled:opacity-60">
+                  className="flex-1 bg-[#25B897] text-white py-2 rounded-md font-medium hover:bg-[#d8940a] disabled:opacity-60">
                   {saleLoading ? "جارٍ الحفظ..." : "تأكيد البيع"}
                 </button>
                 <button type="button" onClick={() => setShowSaleDialog(false)}

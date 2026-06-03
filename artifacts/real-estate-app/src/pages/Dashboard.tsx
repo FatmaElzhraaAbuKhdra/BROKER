@@ -6,7 +6,7 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-const COLORS = ["#1b6ca8", "#f0a500", "#2e7d32", "#0d7a8a", "#dc3545", "#6c757d", "#8e44ad", "#e67e22"];
+const COLORS = ["#1A8A6C", "#25B897", "#2e7d32", "#1A9B7A", "#dc3545", "#6c757d", "#8e44ad", "#e67e22"];
 
 const STATUS_AR: Record<string, string> = {
   AVAILABLE: "متاحة",
@@ -16,7 +16,7 @@ const STATUS_AR: Record<string, string> = {
 const STATUS_COLOR: Record<string, string> = {
   AVAILABLE: "#2e7d32",
   SOLD: "#dc3545",
-  RESERVED: "#f0a500",
+  RESERVED: "#25B897",
 };
 
 export default function Dashboard() {
@@ -39,10 +39,10 @@ export default function Dashboard() {
   });
 
   const kpiCards = [
-    { label: "إجمالي الوحدات", value: kpis?.totalUnits ?? 0, icon: Building2, color: "#1b6ca8", bg: "#e8f0f8" },
+    { label: "إجمالي الوحدات", value: kpis?.totalUnits ?? 0, icon: Building2, color: "#1A8A6C", bg: "#e8f0f8" },
     { label: "وحدات مباعة", value: kpis?.soldUnits ?? 0, icon: Home, color: "#dc3545", bg: "#fce8ea" },
     { label: "وحدات متاحة", value: kpis?.availableUnits ?? 0, icon: TrendingUp, color: "#2e7d32", bg: "#e8f5e9" },
-    { label: "قيمة المبيعات", value: formatPrice(kpis?.totalSalesValue ?? 0), icon: DollarSign, color: "#f0a500", bg: "#fff8e1" },
+    { label: "قيمة المبيعات", value: formatPrice(kpis?.totalSalesValue ?? 0), icon: DollarSign, color: "#25B897", bg: "#fff8e1" },
   ];
 
   const typeData = (byType ?? []).filter(d => d.COUNT > 0);
@@ -51,7 +51,7 @@ export default function Dashboard() {
   return (
     <div dir="rtl" className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-[#1b3a57]">لوحة التحكم</h1>
+        <h1 className="text-xl font-bold text-[#0D4D3A]">لوحة التحكم</h1>
         <span className="text-xs text-gray-500">يتجدد كل 30 ثانية</span>
       </div>
 
@@ -76,7 +76,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Units by type — pie with legend */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h2 className="font-semibold text-[#1b3a57] mb-3 text-sm">الوحدات حسب النوع</h2>
+          <h2 className="font-semibold text-[#0D4D3A] mb-3 text-sm">الوحدات حسب النوع</h2>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
@@ -100,7 +100,7 @@ export default function Dashboard() {
 
         {/* Units status — pie with legend */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h2 className="font-semibold text-[#1b3a57] mb-3 text-sm">حالة الوحدات</h2>
+          <h2 className="font-semibold text-[#0D4D3A] mb-3 text-sm">حالة الوحدات</h2>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
@@ -129,7 +129,7 @@ export default function Dashboard() {
 
       {/* Recent Sales */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="bg-[#1b3a57] text-white px-4 py-2 rounded-t-lg text-sm font-medium">
+        <div className="bg-[#0D4D3A] text-white px-4 py-2 rounded-t-lg text-sm font-medium">
           آخر المبيعات
         </div>
         <div className="overflow-x-auto">

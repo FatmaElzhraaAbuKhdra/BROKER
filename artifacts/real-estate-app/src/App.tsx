@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-[#1b6ca8]">جارٍ التحميل...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-[#1A8A6C]">جارٍ التحميل...</div>;
   if (!user) return <Redirect to="/login" />;
   return <AppLayout><Component /></AppLayout>;
 }
