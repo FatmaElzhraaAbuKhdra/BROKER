@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, formatPrice, formatDate, type DashboardKpis } from "@/lib/api";
 import { Building2, Home, TrendingUp, DollarSign } from "lucide-react";
 import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  PieChart, Pie, Cell,
   Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
@@ -29,12 +29,6 @@ export default function Dashboard() {
   const { data: byType } = useQuery<{ TYPE_NAME: string; COUNT: number }[]>({
     queryKey: ["dashboard-by-type"],
     queryFn: () => api.get("/dashboard/units-by-type"),
-    refetchInterval: 30_000,
-  });
-
-  const { data: byProject } = useQuery<{ PROJECT_NAME: string; SALES_COUNT: number; TOTAL_AMOUNT: number }[]>({
-    queryKey: ["dashboard-by-project"],
-    queryFn: () => api.get("/dashboard/sales-by-project"),
     refetchInterval: 30_000,
   });
 
@@ -131,20 +125,6 @@ export default function Dashboard() {
             </PieChart>
           </ResponsiveContainer>
         </div>
-      </div>
-
-      {/* Sales by Project bar */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h2 className="font-semibold text-[#1b3a57] mb-4 text-sm">المبيعات حسب المشروع</h2>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={byProject ?? []} margin={{ top: 5, right: 10, left: 40, bottom: 40 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="PROJECT_NAME" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" interval={0} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-            <Tooltip formatter={(val) => [formatPrice(Number(val)), "قيمة المبيعات"]} />
-            <Bar dataKey="TOTAL_AMOUNT" name="قيمة المبيعات" fill="#1b6ca8" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
       </div>
 
       {/* Recent Sales */}

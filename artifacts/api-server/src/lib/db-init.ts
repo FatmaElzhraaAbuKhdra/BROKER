@@ -402,6 +402,9 @@ export async function initDatabase(): Promise<{
     }
     // ────────────────────────────────────────────────────────────────────────────
 
+    // CLEANUP: remove demo data not in the client file
+    await cleanDemoData(conn);
+
     // SEED DATA — only if tables are empty
     await seedData(conn);
 
@@ -419,6 +422,58 @@ export async function initDatabase(): Promise<{
       } catch {}
     }
   }
+}
+
+async function cleanDemoData(conn: import("oracledb").Connection): Promise<void> {
+  // Check if any demo projects exist (anything that is NOT the client file project)
+  const demoCheck = await conn.execute<[number]>(
+    `SELECT COUNT(*) FROM PROJECTS WHERE PROJECT_NAME != :1`,
+    ["الرمال - آل متعب"],
+  );
+  if ((demoCheck.rows?.[0]?.[0] ?? 0) === 0) return; // nothing to clean
+
+  // Delete in FK-safe order
+  await conn.execute(
+    `DELETE FROM SALES WHERE UNIT_ID IN (
+       SELECT UNIT_ID FROM UNITS WHERE PROJECT_ID IN (
+         SELECT PROJECT_ID FROM PROJECTS WHERE PROJECT_NAME != :1
+       )
+     )`,
+    ["الرمال - آل متعب"],
+  );
+  await conn.execute(
+    `DELETE FROM UNIT_IMAGES WHERE UNIT_ID IN (
+       SELECT UNIT_ID FROM UNITS WHERE PROJECT_ID IN (
+         SELECT PROJECT_ID FROM PROJECTS WHERE PROJECT_NAME != :1
+       )
+     )`,
+    ["الرمال - آل متعب"],
+  );
+  await conn.execute(
+    `DELETE FROM UNITS WHERE PROJECT_ID IN (
+       SELECT PROJECT_ID FROM PROJECTS WHERE PROJECT_NAME != :1
+     )`,
+    ["الرمال - آل متعب"],
+  );
+  await conn.execute(
+    `DELETE FROM FLOORS WHERE BUILDING_ID IN (
+       SELECT BUILDING_ID FROM BUILDINGS WHERE PROJECT_ID IN (
+         SELECT PROJECT_ID FROM PROJECTS WHERE PROJECT_NAME != :1
+       )
+     )`,
+    ["الرمال - آل متعب"],
+  );
+  await conn.execute(
+    `DELETE FROM BUILDINGS WHERE PROJECT_ID IN (
+       SELECT PROJECT_ID FROM PROJECTS WHERE PROJECT_NAME != :1
+     )`,
+    ["الرمال - آل متعب"],
+  );
+  await conn.execute(
+    `DELETE FROM PROJECTS WHERE PROJECT_NAME != :1`,
+    ["الرمال - آل متعب"],
+  );
+  logger.info("cleanDemoData: removed demo data, kept only الرمال - آل متعب");
 }
 
 async function rowCount(
