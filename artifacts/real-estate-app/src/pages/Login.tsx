@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-b from-[#0D4D3A] to-[#163D2E] flex items-center justify-center p-4">
+    <div dir="rtl" className="min-h-screen bg-[#F5FAF8] flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-[#0D4D3A] text-white p-6 text-center border-b-4 border-[#25B897]">
