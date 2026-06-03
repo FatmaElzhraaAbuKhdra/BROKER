@@ -400,6 +400,26 @@ export async function initDatabase(): Promise<{
       await executeStatement(conn, `ALTER TABLE UNITS ADD SALEABLE_AREA NUMBER(10,2)`, "ALTER UNITS ADD SALEABLE_AREA");
       created.push("UNITS.SALEABLE_AREA");
     }
+
+    // ── Constraint migration: allow PRICE = 0 (unpriced units) ──────────────
+    try {
+      await conn.execute(`ALTER TABLE UNITS DROP CONSTRAINT CHK_UNITS_PRICE`);
+      await conn.execute(`ALTER TABLE UNITS ADD CONSTRAINT CHK_UNITS_PRICE CHECK (PRICE >= 0)`);
+      logger.info("DB Init: CHK_UNITS_PRICE updated to allow 0");
+    } catch (err: unknown) {
+      const e = err as { errorNum?: number };
+      // ORA-02443: constraint does not exist — already dropped or renamed; try adding only
+      if (e.errorNum === 2443) {
+        await executeStatement(conn, `ALTER TABLE UNITS ADD CONSTRAINT CHK_UNITS_PRICE CHECK (PRICE >= 0)`, "CHK_UNITS_PRICE (add >=0)");
+      }
+      // Any other error: constraint may already be >= 0 — ignore
+    }
+
+    // ── Data migration: reset placeholder price (1) → 0 for non-sold units ──
+    await conn.execute(
+      `UPDATE UNITS SET PRICE = 0 WHERE PRICE = 1 AND STATUS != 'SOLD'`,
+    );
+    logger.info("DB Init: reset placeholder PRICE=1 → 0 for available units");
     // ────────────────────────────────────────────────────────────────────────────
 
     // CLEANUP: remove demo data not in the client file
@@ -738,10 +758,10 @@ async function seedData(conn: import("oracledb").Connection): Promise<void> {
         const flIdRes = await conn.execute<[number]>(`SELECT SEQ_FLOORS.CURRVAL FROM DUAL`);
         const flId = flIdRes.rows?.[0]?.[0] as number;
 
-        // Insert unit (PRICE=1 as placeholder — must be > 0 per CHK_UNITS_PRICE constraint)
+        // Insert unit — PRICE=0 means "not yet priced"
         await conn.execute(
           `INSERT INTO UNITS (UNIT_ID, UNIT_CODE, UNIT_NAME, TYPE_ID, PROJECT_ID, BUILDING_ID, FLOOR_ID, AREA, SALEABLE_AREA, ROOMS, BATHROOMS, PRICE, STATUS, DESCRIPTION, CREATED_BY)
-           VALUES (SEQ_UNITS.NEXTVAL, :1, :2, :3, :4, :5, :6, :7, :8, 0, 0, 1, 'AVAILABLE', :9, 'SYSTEM')`,
+           VALUES (SEQ_UNITS.NEXTVAL, :1, :2, :3, :4, :5, :6, :7, :8, 0, 0, 0, 'AVAILABLE', :9, 'SYSTEM')`,
           [
             fl.code,
             `وحدة ${fl.code}`,
