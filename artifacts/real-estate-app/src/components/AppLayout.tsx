@@ -3,23 +3,20 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import {
   LayoutDashboard, Building2, Home, Layers, Users, ShoppingCart,
-  FolderOpen, FloorPlan, Tags, LogOut, Menu, X, ChevronLeft
+  Tags, LogOut, Menu, X, ChevronLeft
 } from "lucide-react";
 
 const nav = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/units", label: "الوحدات", icon: Home },
   { href: "/unit-types", label: "أنواع الوحدات", icon: Tags },
-  { href: "/projects", label: "المشاريع", icon: FolderOpen },
   { href: "/buildings", label: "المباني", icon: Building2 },
   { href: "/floors", label: "الأدوار", icon: Layers },
   { href: "/customers", label: "العملاء", icon: Users },
   { href: "/sales", label: "المبيعات", icon: ShoppingCart },
 ];
 
-const adminNav = [
-  { href: "/users", label: "المستخدمون", icon: Users },
-];
+const adminNav: typeof nav = [];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { user, logout, isAdmin } = useAuth();
