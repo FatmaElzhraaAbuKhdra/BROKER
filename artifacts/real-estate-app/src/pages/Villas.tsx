@@ -253,12 +253,12 @@ export default function Villas() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="bg-[#0D4D3A] text-white px-5 py-3 rounded-t-lg flex items-center justify-between sticky top-0">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div className="bg-[#0D4D3A] text-white px-5 py-3 rounded-t-lg flex items-center justify-between flex-shrink-0">
               <span className="font-semibold">{editing ? "تعديل الفيلا" : "إضافة فيلا جديدة"}</span>
               <button onClick={() => setShowModal(false)} className="hover:text-white/70"><X className="w-5 h-5" /></button>
             </div>
-            <form onSubmit={handleSave} className="p-5 space-y-4">
+            <form onSubmit={handleSave} className="p-5 space-y-4 overflow-y-auto">
               <div>
                 <label className="text-sm font-medium block mb-1">المشروع *</label>
                 <select className={ic} value={form.projectId} onChange={s("projectId")} required>
