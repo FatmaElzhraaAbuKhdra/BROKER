@@ -5,6 +5,17 @@ import { api, type Unit, type UnitType, type Project, type Building, type Floor 
 import { ArrowRight, Save } from "lucide-react";
 import { toast } from "sonner";
 
+function F({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) {
+  return (
+    <div>
+      <label className="text-sm font-medium text-gray-700 block mb-1">
+        {label}{required && <span className="text-red-500 mr-1">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function UnitForm() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
@@ -82,13 +93,6 @@ export default function UnitForm() {
       setLoading(false);
     }
   };
-
-  const F = ({ label, children, required }: { label: string; children: React.ReactNode; required?: boolean }) => (
-    <div>
-      <label className="text-sm font-medium text-gray-700 block mb-1">{label}{required && <span className="text-red-500 mr-1">*</span>}</label>
-      {children}
-    </div>
-  );
 
   const inputClass = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]";
 

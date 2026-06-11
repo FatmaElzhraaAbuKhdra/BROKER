@@ -1,0 +1,385 @@
+CONTINUE THE EXISTING REAL ESTATE SYSTEM.
+
+IMPORTANT:
+
+DO NOT redesign, refactor, restyle, replace, or modify any existing UI, colors, layouts, cards, tables, menus, RTL behavior, spacing, typography, dashboard, units page, login page, or navigation.
+
+The current design is approved.
+
+Only ADD the functionality below.
+
+==================================================
+
+1. NEW VILLAS MODULE
+   ==================================================
+
+Create a new menu item:
+
+🏡 الفلل
+
+Place it after Units.
+
+Create a Villas page using the same card design used in Units.
+
+Each Villa Card must display:
+
+* Villa Code
+* Villa Name
+* Total Units
+* Sold Units
+* Available Units
+* Total Saleable Area
+* Sales Progress
+
+Example:
+
+Villa 1
+
+3 Units
+Sold: 1
+Available: 2
+
+Progress:
+1 / 3
+
+---
+
+## Villa Status Colors
+
+Use SAME colors already used in Units.
+
+# AVAILABLE
+
+# All units available
+
+Green border
+
+# FULLY SOLD
+
+# All units sold
+
+Red border
+
+# PARTIALLY SOLD
+
+# Some sold and some available
+
+Yellow border
+
+Examples:
+
+0/3 sold = Green
+
+1/3 sold = Yellow
+
+2/3 sold = Yellow
+
+3/3 sold = Red
+
+==================================================
+2. VILLA CRUD
+=============
+
+Add:
+
+* Add Villa
+* Edit Villa
+* Delete Villa
+* View Villa
+
+using the same style used in Units.
+
+Villa Form fields:
+
+* Villa Code
+* Villa Name
+* Project
+* Notes
+* Total Saleable Area
+
+==================================================
+3. LINK VILLA WITH UNITS
+========================
+
+Inside Unit Form:
+
+Add field:
+
+Villa
+
+Dropdown
+
+Load villas from database.
+
+User can select a villa.
+
+Save relationship between Unit and Villa.
+
+==================================================
+4. VILLA CARD CLICK BEHAVIOR
+============================
+
+When clicking a Villa Card:
+
+Navigate to the existing Units page.
+
+Automatically apply filter:
+
+Only units linked to that villa.
+
+Example:
+
+Villa 1 contains:
+
+GR-01
+FIR-01
+RF-01
+
+Click Villa 1
+
+Open Units page
+
+Show only:
+
+GR-01
+FIR-01
+RF-01
+
+Keep all existing filters working:
+
+* All
+* Sold
+* Available
+
+==================================================
+5. UNIT FORM ENHANCEMENT
+========================
+
+Keep the existing Unit Form exactly as it is.
+
+Below the existing fields add a new section:
+
+==================================================
+Installments
+============
+
+Use Editable Interactive Grid.
+
+Allow:
+
+* Add Installment
+* Edit Installment
+* Delete Installment
+
+Columns:
+
+Installment No
+Installment Amount
+Due Date
+Paid Amount
+Paid Date
+Status
+Notes
+
+Status values:
+
+Pending
+Paid
+Partially Paid
+Overdue
+
+==================================================
+6. UNIT FORM LAYOUT
+===================
+
+Below the current Unit Information section display:
+
+---
+
+## Installments Summary
+
+Total Unit Price
+
+Total Paid
+
+Remaining Amount
+
+Number of Installments
+
+Paid Installments
+
+Remaining Installments
+
+Next Installment Amount
+
+Next Installment Due Date
+
+---
+
+Then display the Installments Grid.
+
+Visual layout:
+
+UNIT INFORMATION
+
+[ existing fields ]
+
+---
+
+INSTALLMENTS SUMMARY
+
+Total Price
+Total Paid
+Remaining
+
+Next Installment
+
+---
+
+INSTALLMENTS GRID
+
+Installment No
+Amount
+Due Date
+Status
+
+[ Add Row ]
+
+==================================================
+7. EXISTING PAYMENT DATA
+========================
+
+The system must support:
+
+Existing installment records
+
+and
+
+new installment records.
+
+When editing a unit:
+
+Load previously saved installments automatically.
+
+User can:
+
+Edit
+Delete
+Add
+
+installments.
+
+==================================================
+8. VILLA DETAILS PAGE
+=====================
+
+When opening Villa Details:
+
+Display:
+
+Villa Information
+
+Then:
+
+Units belonging to this villa
+
+using the same Unit Cards style.
+
+Show:
+
+Sold
+Available
+
+using existing colors.
+
+==================================================
+9. DASHBOARD ENHANCEMENT
+========================
+
+Add KPIs:
+
+Total Villas
+
+Available Villas
+
+Partially Sold Villas
+
+Fully Sold Villas
+
+Add chart:
+
+Sales Progress By Villa
+
+==================================================
+10. BUSINESS RULES
+==================
+
+If all units inside villa are available:
+
+Villa Status = AVAILABLE
+
+If some units sold:
+
+Villa Status = PARTIALLY SOLD
+
+If all units sold:
+
+Villa Status = FULLY SOLD
+
+Status must update automatically.
+
+==================================================
+11. TESTING
+===========
+
+Test:
+
+Add Villa
+
+Edit Villa
+
+Delete Villa
+
+Link Unit to Villa
+
+Open Villa
+
+Filter Units by Villa
+
+Add Installment
+
+Edit Installment
+
+Delete Installment
+
+Load Existing Installments
+
+Villa Progress Calculation
+
+Dashboard KPIs
+
+==================================================
+12. FINAL DEPLOYMENT
+====================
+
+After everything is completed:
+
+* Run all database migrations safely
+* Verify APIs
+* Verify frontend
+* Verify Oracle connection
+
+Then publish the application.
+
+Provide:
+
+1. Live Application URL
+2. API Status
+3. Database Status
+4. Villas Module Status
+5. Installments Module Status
+6. Screenshots of Villas Page
+7. Screenshots of Unit Form with Installments
+8. Confirmation that existing UI was NOT modified
+
+Do not stop until all tasks are completed and the application is deployed successfully.
