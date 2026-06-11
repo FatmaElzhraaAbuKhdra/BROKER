@@ -92,4 +92,71 @@ router.get("/dashboard/units-status", requireAuth, async (_req, res) => {
   }
 });
 
+// GET /api/dashboard/villa-kpis
+router.get("/dashboard/villa-kpis", requireAuth, async (_req, res) => {
+  let conn;
+  try {
+    conn = await getConnection();
+    const result = await conn.execute<[number, number, number, number]>(
+      `SELECT
+         COUNT(*) AS TOTAL_VILLAS,
+         SUM(CASE WHEN VILLA_STATUS = 'AVAILABLE' THEN 1 ELSE 0 END) AS AVAILABLE_VILLAS,
+         SUM(CASE WHEN VILLA_STATUS = 'PARTIALLY_SOLD' THEN 1 ELSE 0 END) AS PARTIALLY_SOLD_VILLAS,
+         SUM(CASE WHEN VILLA_STATUS = 'FULLY_SOLD' THEN 1 ELSE 0 END) AS FULLY_SOLD_VILLAS
+       FROM (
+         SELECT v.VILLA_ID,
+           CASE
+             WHEN COUNT(u.UNIT_ID) = 0 OR SUM(CASE WHEN u.STATUS = 'SOLD' THEN 1 ELSE 0 END) = 0 THEN 'AVAILABLE'
+             WHEN SUM(CASE WHEN u.STATUS = 'SOLD' THEN 1 ELSE 0 END) >= COUNT(u.UNIT_ID) THEN 'FULLY_SOLD'
+             ELSE 'PARTIALLY_SOLD'
+           END AS VILLA_STATUS
+         FROM VILLAS v
+         LEFT JOIN UNITS u ON u.VILLA_ID = v.VILLA_ID
+         GROUP BY v.VILLA_ID
+       )`,
+    );
+    const row = result.rows?.[0];
+    res.json({
+      totalVillas: row?.[0] ?? 0,
+      availableVillas: row?.[1] ?? 0,
+      partiallySoldVillas: row?.[2] ?? 0,
+      fullySoldVillas: row?.[3] ?? 0,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch villa KPIs" });
+  } finally {
+    if (conn) await conn.close().catch(() => {});
+  }
+});
+
+// GET /api/dashboard/villas-progress
+router.get("/dashboard/villas-progress", requireAuth, async (_req, res) => {
+  let conn;
+  try {
+    conn = await getConnection();
+    const result = await conn.execute(
+      `SELECT v.VILLA_NAME,
+              NVL(us.TOTAL_UNITS, 0) AS TOTAL_UNITS,
+              NVL(us.SOLD_UNITS, 0) AS SOLD_UNITS,
+              NVL(us.AVAILABLE_UNITS, 0) AS AVAILABLE_UNITS
+       FROM VILLAS v
+       LEFT JOIN (
+         SELECT VILLA_ID,
+                COUNT(*) AS TOTAL_UNITS,
+                SUM(CASE WHEN STATUS = 'SOLD' THEN 1 ELSE 0 END) AS SOLD_UNITS,
+                SUM(CASE WHEN STATUS = 'AVAILABLE' THEN 1 ELSE 0 END) AS AVAILABLE_UNITS
+         FROM UNITS WHERE VILLA_ID IS NOT NULL
+         GROUP BY VILLA_ID
+       ) us ON us.VILLA_ID = v.VILLA_ID
+       ORDER BY v.VILLA_ID`,
+      [], { outFormat: oracledb.OUT_FORMAT_OBJECT },
+    );
+    res.json(result.rows ?? []);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch villas progress" });
+  } finally {
+    if (conn) await conn.close().catch(() => {});
+  }
+});
+
 export default router;

@@ -493,6 +493,18 @@ export async function initDatabase(): Promise<{
       }
     }
 
+    // ── Add PAID_AMOUNT column to INSTALLMENTS ───────────────────────────────
+    if (!(await columnExists("INSTALLMENTS", "PAID_AMOUNT"))) {
+      await executeStatement(conn, `ALTER TABLE INSTALLMENTS ADD PAID_AMOUNT NUMBER(15,2) DEFAULT 0`, "ALTER INSTALLMENTS ADD PAID_AMOUNT");
+      created.push("INSTALLMENTS.PAID_AMOUNT");
+    }
+    // Update INSTALLMENTS status constraint to include PARTIALLY_PAID
+    try {
+      await conn.execute(`ALTER TABLE INSTALLMENTS DROP CONSTRAINT CHK_INSTALLMENTS_STATUS`);
+      await conn.execute(`ALTER TABLE INSTALLMENTS ADD CONSTRAINT CHK_INSTALLMENTS_STATUS CHECK (STATUS IN ('PENDING','PAID','PARTIALLY_PAID','OVERDUE'))`);
+      logger.info("DB Init: CHK_INSTALLMENTS_STATUS updated to include PARTIALLY_PAID");
+    } catch { /* constraint may already include PARTIALLY_PAID */ }
+
     // ── Constraint migration: allow PRICE = 0 (unpriced units) ──────────────
     try {
       await conn.execute(`ALTER TABLE UNITS DROP CONSTRAINT CHK_UNITS_PRICE`);

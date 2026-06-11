@@ -1,28 +1,39 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { api, formatPrice, type Villa, type Project } from "@/lib/api";
-import { Plus, Search, Edit, Trash2, X, Save, Home, Maximize2, BedDouble, Bath } from "lucide-react";
-import { toast } from "sonner";
+import { Plus, Search, X, Save, Home, Maximize2, BedDouble, Bath, Edit, Trash2, Building } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { toast } from "sonner";
 
-const STATUS_LABELS: Record<string, string> = { AVAILABLE: "متاح", SOLD: "مباع", RESERVED: "محجوز" };
-const STATUS_CONFIG: Record<string, { border: string; header: string; badge: string }> = {
+function getDisplayStatus(v: Villa): "AVAILABLE" | "PARTIALLY_SOLD" | "FULLY_SOLD" {
+  if (v.TOTAL_UNITS === 0 || v.SOLD_UNITS === 0) return "AVAILABLE";
+  if (v.SOLD_UNITS >= v.TOTAL_UNITS) return "FULLY_SOLD";
+  return "PARTIALLY_SOLD";
+}
+
+const DISPLAY_CONFIG = {
   AVAILABLE: {
     border: "border-emerald-400",
     header: "bg-gradient-to-l from-emerald-600 to-emerald-500",
     badge: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+    label: "متاح",
   },
-  SOLD: {
-    border: "border-rose-400",
-    header: "bg-gradient-to-l from-rose-600 to-rose-500",
-    badge: "bg-rose-100 text-rose-700 border border-rose-200",
-  },
-  RESERVED: {
+  PARTIALLY_SOLD: {
     border: "border-amber-400",
     header: "bg-gradient-to-l from-amber-500 to-amber-400",
     badge: "bg-amber-100 text-amber-700 border border-amber-200",
+    label: "مباع جزئياً",
+  },
+  FULLY_SOLD: {
+    border: "border-rose-400",
+    header: "bg-gradient-to-l from-rose-600 to-rose-500",
+    badge: "bg-rose-100 text-rose-700 border border-rose-200",
+    label: "مباع كلياً",
   },
 };
+
+const STATUS_LABELS: Record<string, string> = { AVAILABLE: "متاح", SOLD: "مباع", RESERVED: "محجوز" };
 
 const emptyForm = {
   projectId: "", villaCode: "", villaName: "", area: "", landArea: "",
@@ -30,6 +41,7 @@ const emptyForm = {
 };
 
 export default function Villas() {
+  const [, navigate] = useLocation();
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -57,25 +69,19 @@ export default function Villas() {
     queryFn: () => api.get("/projects"),
   });
 
-  const cfg = (status: string) => STATUS_CONFIG[status] ?? STATUS_CONFIG.AVAILABLE;
   const s = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
   const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]";
 
   const openAdd = () => { setEditing(null); setForm(emptyForm); setShowModal(true); };
-  const openEdit = (v: Villa) => {
+  const openEdit = (v: Villa, e: React.MouseEvent) => {
+    e.stopPropagation();
     setEditing(v);
     setForm({
-      projectId: String(v.PROJECT_ID),
-      villaCode: v.VILLA_CODE,
-      villaName: v.VILLA_NAME,
-      area: String(v.AREA),
-      landArea: v.LAND_AREA != null ? String(v.LAND_AREA) : "",
-      rooms: String(v.ROOMS),
-      bathrooms: String(v.BATHROOMS),
-      price: String(v.PRICE),
-      status: v.STATUS,
-      description: v.DESCRIPTION || "",
+      projectId: String(v.PROJECT_ID), villaCode: v.VILLA_CODE, villaName: v.VILLA_NAME,
+      area: String(v.AREA), landArea: v.LAND_AREA != null ? String(v.LAND_AREA) : "",
+      rooms: String(v.ROOMS), bathrooms: String(v.BATHROOMS), price: String(v.PRICE),
+      status: v.STATUS, description: v.DESCRIPTION || "",
     });
     setShowModal(true);
   };
@@ -89,16 +95,10 @@ export default function Villas() {
     setLoading(true);
     try {
       const body = {
-        projectId: Number(form.projectId),
-        villaCode: form.villaCode,
-        villaName: form.villaName,
-        area: Number(form.area),
-        landArea: form.landArea ? Number(form.landArea) : null,
-        rooms: Number(form.rooms),
-        bathrooms: Number(form.bathrooms),
-        price: Number(form.price),
-        status: form.status,
-        description: form.description || null,
+        projectId: Number(form.projectId), villaCode: form.villaCode, villaName: form.villaName,
+        area: Number(form.area), landArea: form.landArea ? Number(form.landArea) : null,
+        rooms: Number(form.rooms), bathrooms: Number(form.bathrooms), price: Number(form.price),
+        status: form.status, description: form.description || null,
       };
       if (editing) {
         await api.put(`/villas/${editing.VILLA_ID}`, body);
@@ -116,7 +116,8 @@ export default function Villas() {
     }
   };
 
-  const handleDelete = async (v: Villa) => {
+  const handleDelete = async (v: Villa, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (v.STATUS === "SOLD") { toast.error("لا يمكن حذف فيلا مباعة"); return; }
     if (!confirm(`هل أنت متأكد من حذف "${v.VILLA_NAME}"؟`)) return;
     try {
@@ -177,10 +178,14 @@ export default function Villas() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {villas.map(villa => {
-            const c = cfg(villa.STATUS);
+            const displayStatus = getDisplayStatus(villa);
+            const c = DISPLAY_CONFIG[displayStatus];
+            const progress = villa.TOTAL_UNITS > 0 ? Math.round((villa.SOLD_UNITS / villa.TOTAL_UNITS) * 100) : 0;
+            const progressColor = progress === 100 ? "#dc3545" : progress > 0 ? "#f59e0b" : "#1A8A6C";
             return (
               <div key={villa.VILLA_ID}
-                className={`bg-white rounded-xl shadow-sm border-2 ${c.border} transition-all duration-200 hover:shadow-lg hover:-translate-y-1 flex flex-col overflow-hidden`}>
+                onClick={() => navigate(`/villas/${villa.VILLA_ID}`)}
+                className={`bg-white rounded-xl shadow-sm border-2 ${c.border} transition-all duration-200 hover:shadow-lg hover:-translate-y-1 flex flex-col overflow-hidden cursor-pointer`}>
 
                 {/* Colored header */}
                 <div className={`${c.header} text-white px-4 py-3`}>
@@ -190,7 +195,7 @@ export default function Villas() {
                       <div className="text-xs text-white/75 mt-0.5 font-mono">{villa.VILLA_CODE}</div>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium ${c.badge}`}>
-                      {STATUS_LABELS[villa.STATUS] ?? villa.STATUS}
+                      {c.label}
                     </span>
                   </div>
                 </div>
@@ -210,35 +215,54 @@ export default function Villas() {
                   </div>
                   {(villa.ROOMS > 0 || villa.BATHROOMS > 0) && (
                     <div className="flex gap-3 text-xs text-gray-600">
-                      {villa.ROOMS > 0 && (
-                        <div className="flex items-center gap-1">
-                          <BedDouble className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{villa.ROOMS} غرف</span>
-                        </div>
-                      )}
-                      {villa.BATHROOMS > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Bath className="w-3.5 h-3.5 text-gray-400" />
-                          <span>{villa.BATHROOMS} حمامات</span>
-                        </div>
-                      )}
+                      {villa.ROOMS > 0 && <div className="flex items-center gap-1"><BedDouble className="w-3.5 h-3.5 text-gray-400" /><span>{villa.ROOMS}</span></div>}
+                      {villa.BATHROOMS > 0 && <div className="flex items-center gap-1"><Bath className="w-3.5 h-3.5 text-gray-400" /><span>{villa.BATHROOMS}</span></div>}
                     </div>
                   )}
+
+                  {/* Unit stats */}
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Building className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-600">{villa.TOTAL_UNITS} وحدة</span>
+                    {villa.TOTAL_UNITS > 0 && (
+                      <>
+                        <span className="text-gray-300">·</span>
+                        <span className="text-emerald-600">{villa.AVAILABLE_UNITS} متاح</span>
+                        <span className="text-gray-300">·</span>
+                        <span className="text-rose-600">{villa.SOLD_UNITS} مباع</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Progress bar */}
+                  {villa.TOTAL_UNITS > 0 && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>نسبة المبيعات</span>
+                        <span className="font-medium">{progress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-1.5">
+                        <div className="h-1.5 rounded-full transition-all"
+                          style={{ width: `${progress}%`, backgroundColor: progressColor }} />
+                      </div>
+                    </div>
+                  )}
+
                   <div className="text-[#1A8A6C] font-bold text-base pt-1 border-t border-gray-100">
                     {formatPrice(villa.PRICE)}
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Admin Actions */}
                 {isAdmin && (
                   <div className="px-4 pb-4 flex gap-2">
                     {villa.STATUS !== "SOLD" && (
-                      <button onClick={() => openEdit(villa)}
+                      <button onClick={e => openEdit(villa, e)}
                         className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 border border-[#1A8A6C] text-[#1A8A6C] rounded-lg hover:bg-[#1A8A6C] hover:text-white transition-colors font-medium">
                         <Edit className="w-3.5 h-3.5" /> تعديل
                       </button>
                     )}
-                    <button onClick={() => handleDelete(villa)}
+                    <button onClick={e => handleDelete(villa, e)}
                       className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 border border-red-400 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium">
                       <Trash2 className="w-3.5 h-3.5" /> حذف
                     </button>

@@ -122,12 +122,14 @@ export interface Unit {
   PRICE: number;
   STATUS: "AVAILABLE" | "SOLD" | "RESERVED";
   DESCRIPTION: string;
+  VILLA_ID: number | null;
   TYPE_NAME: string;
   PROJECT_NAME: string;
   BUILDING_NAME: string;
   FLOOR_NUMBER: string;
   FLOOR_NAME: string;
   FLOOR_TYPE: string | null;
+  VILLA_NAME: string | null;
   IMAGES?: UnitImage[];
   CREATED_DATE: string;
 }
@@ -167,6 +169,13 @@ export interface DashboardKpis {
   recentSales: RecentSale[];
 }
 
+export interface VillaKpis {
+  totalVillas: number;
+  availableVillas: number;
+  partiallySoldVillas: number;
+  fullySoldVillas: number;
+}
+
 export interface RecentSale {
   SALE_ID: number;
   UNIT_CODE: string;
@@ -189,6 +198,9 @@ export interface Villa {
   STATUS: "AVAILABLE" | "SOLD" | "RESERVED";
   DESCRIPTION: string;
   PROJECT_NAME: string;
+  TOTAL_UNITS: number;
+  SOLD_UNITS: number;
+  AVAILABLE_UNITS: number;
   CREATED_DATE: string;
 }
 
@@ -197,10 +209,18 @@ export interface Installment {
   UNIT_ID: number;
   DUE_DATE: string;
   AMOUNT: number;
+  PAID_AMOUNT: number;
   PAID_DATE: string | null;
-  STATUS: "PENDING" | "PAID" | "OVERDUE";
+  STATUS: "PENDING" | "PAID" | "PARTIALLY_PAID" | "OVERDUE";
   NOTES: string | null;
   CREATED_DATE: string;
+}
+
+export interface VillaProgress {
+  VILLA_NAME: string;
+  TOTAL_UNITS: number;
+  SOLD_UNITS: number;
+  AVAILABLE_UNITS: number;
 }
 
 export function formatPrice(price: number): string {

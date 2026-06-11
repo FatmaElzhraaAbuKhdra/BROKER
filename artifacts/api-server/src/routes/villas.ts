@@ -8,9 +8,21 @@ const VILLA_SELECT = `
   SELECT v.VILLA_ID, v.PROJECT_ID, v.VILLA_CODE, v.VILLA_NAME,
          v.AREA, v.LAND_AREA, v.ROOMS, v.BATHROOMS, v.PRICE,
          v.STATUS, v.DESCRIPTION, v.CREATED_BY, v.CREATED_DATE,
-         p.PROJECT_NAME
+         p.PROJECT_NAME,
+         NVL(us.TOTAL_UNITS, 0) AS TOTAL_UNITS,
+         NVL(us.SOLD_UNITS, 0) AS SOLD_UNITS,
+         NVL(us.AVAILABLE_UNITS, 0) AS AVAILABLE_UNITS
   FROM VILLAS v
   JOIN PROJECTS p ON v.PROJECT_ID = p.PROJECT_ID
+  LEFT JOIN (
+    SELECT VILLA_ID,
+           COUNT(*) AS TOTAL_UNITS,
+           SUM(CASE WHEN STATUS = 'SOLD' THEN 1 ELSE 0 END) AS SOLD_UNITS,
+           SUM(CASE WHEN STATUS = 'AVAILABLE' THEN 1 ELSE 0 END) AS AVAILABLE_UNITS
+    FROM UNITS
+    WHERE VILLA_ID IS NOT NULL
+    GROUP BY VILLA_ID
+  ) us ON us.VILLA_ID = v.VILLA_ID
 `;
 
 // GET /api/villas
@@ -55,6 +67,38 @@ router.get("/villas/:id", requireAuth, async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Get villa error");
     res.status(500).json({ error: "Failed to fetch villa" });
+  } finally {
+    if (conn) await conn.close().catch(() => {});
+  }
+});
+
+// GET /api/villas/:id/units
+router.get("/villas/:id/units", requireAuth, async (req, res) => {
+  let conn;
+  try {
+    conn = await getConnection();
+    const result = await conn.execute(
+      `SELECT u.UNIT_ID, u.UNIT_CODE, u.UNIT_NAME, u.TYPE_ID, u.PROJECT_ID, u.BUILDING_ID, u.FLOOR_ID,
+              u.AREA, u.SALEABLE_AREA, u.ROOMS, u.BATHROOMS,
+              CASE WHEN u.STATUS = 'SOLD' THEN NVL(s.SALE_AMOUNT, u.PRICE) ELSE u.PRICE END AS PRICE,
+              u.STATUS, u.DESCRIPTION, u.VILLA_ID,
+              u.CREATED_BY, u.CREATED_DATE,
+              t.TYPE_NAME, p.PROJECT_NAME, b.BUILDING_NAME, f.FLOOR_NUMBER, f.FLOOR_NAME, f.FLOOR_TYPE
+       FROM UNITS u
+       JOIN UNIT_TYPES t ON u.TYPE_ID = t.TYPE_ID
+       JOIN PROJECTS p ON u.PROJECT_ID = p.PROJECT_ID
+       JOIN BUILDINGS b ON u.BUILDING_ID = b.BUILDING_ID
+       JOIN FLOORS f ON u.FLOOR_ID = f.FLOOR_ID
+       LEFT JOIN (SELECT UNIT_ID, MAX(SALE_AMOUNT) AS SALE_AMOUNT FROM SALES GROUP BY UNIT_ID) s
+         ON s.UNIT_ID = u.UNIT_ID
+       WHERE u.VILLA_ID = :1
+       ORDER BY u.UNIT_ID`,
+      [req.params["id"]], { outFormat: oracledb.OUT_FORMAT_OBJECT },
+    );
+    res.json(result.rows ?? []);
+  } catch (err) {
+    req.log.error({ err }, "Get villa units error");
+    res.status(500).json({ error: "Failed to fetch villa units" });
   } finally {
     if (conn) await conn.close().catch(() => {});
   }

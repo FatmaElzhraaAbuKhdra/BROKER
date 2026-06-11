@@ -32,9 +32,10 @@ const UNIT_SELECT = `
   SELECT u.UNIT_ID, u.UNIT_CODE, u.UNIT_NAME, u.TYPE_ID, u.PROJECT_ID, u.BUILDING_ID, u.FLOOR_ID,
          u.AREA, u.SALEABLE_AREA, u.ROOMS, u.BATHROOMS,
          CASE WHEN u.STATUS = 'SOLD' THEN NVL(s.SALE_AMOUNT, u.PRICE) ELSE u.PRICE END AS PRICE,
-         u.STATUS, u.DESCRIPTION,
+         u.STATUS, u.DESCRIPTION, u.VILLA_ID,
          u.CREATED_BY, u.CREATED_DATE,
-         t.TYPE_NAME, p.PROJECT_NAME, b.BUILDING_NAME, f.FLOOR_NUMBER, f.FLOOR_NAME, f.FLOOR_TYPE
+         t.TYPE_NAME, p.PROJECT_NAME, b.BUILDING_NAME, f.FLOOR_NUMBER, f.FLOOR_NAME, f.FLOOR_TYPE,
+         vil.VILLA_NAME
   FROM UNITS u
   JOIN UNIT_TYPES t ON u.TYPE_ID = t.TYPE_ID
   JOIN PROJECTS p ON u.PROJECT_ID = p.PROJECT_ID
@@ -42,6 +43,7 @@ const UNIT_SELECT = `
   JOIN FLOORS f ON u.FLOOR_ID = f.FLOOR_ID
   LEFT JOIN (SELECT UNIT_ID, MAX(SALE_AMOUNT) AS SALE_AMOUNT FROM SALES GROUP BY UNIT_ID) s
     ON s.UNIT_ID = u.UNIT_ID
+  LEFT JOIN VILLAS vil ON u.VILLA_ID = vil.VILLA_ID
 `;
 
 // GET /api/units
@@ -99,7 +101,7 @@ router.get("/units/:id", requireAuth, async (req, res) => {
 
 // POST /api/units
 router.post("/units", requireAdmin, async (req, res) => {
-  const { unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea, rooms, bathrooms, price, description } = req.body;
+  const { unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea, rooms, bathrooms, price, description, villaId } = req.body;
   if (!unitCode || !unitName || !typeId || !projectId || !buildingId || !floorId || !area || !price) {
     res.status(400).json({ error: "unitCode, unitName, typeId, projectId, buildingId, floorId, area, price are required" }); return;
   }
@@ -110,9 +112,9 @@ router.post("/units", requireAdmin, async (req, res) => {
   try {
     conn = await getConnection();
     await conn.execute(
-      `INSERT INTO UNITS (UNIT_CODE, UNIT_NAME, TYPE_ID, PROJECT_ID, BUILDING_ID, FLOOR_ID, AREA, SALEABLE_AREA, ROOMS, BATHROOMS, PRICE, STATUS, DESCRIPTION, CREATED_BY)
-       VALUES (:1,:2,:3,:4,:5,:6,:7,:8,:9,:10,:11,'AVAILABLE',:12,:13)`,
-      [unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea || null, rooms || 0, bathrooms || 0, price, description || null, sess["username"] || "ADMIN"],
+      `INSERT INTO UNITS (UNIT_CODE, UNIT_NAME, TYPE_ID, PROJECT_ID, BUILDING_ID, FLOOR_ID, AREA, SALEABLE_AREA, ROOMS, BATHROOMS, PRICE, STATUS, DESCRIPTION, VILLA_ID, CREATED_BY)
+       VALUES (:1,:2,:3,:4,:5,:6,:7,:8,:9,:10,:11,'AVAILABLE',:12,:13,:14)`,
+      [unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea || null, rooms || 0, bathrooms || 0, price, description || null, villaId || null, sess["username"] || "ADMIN"],
       { autoCommit: true },
     );
     res.status(201).json({ message: "Unit created" });
@@ -136,15 +138,15 @@ router.put("/units/:id", requireAdmin, async (req, res) => {
     if ((chk.rows?.[0]?.[0] ?? "") === "SOLD") {
       res.status(403).json({ error: "Cannot edit a SOLD unit" }); return;
     }
-    const { unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea, rooms, bathrooms, price, status, description } = req.body;
+    const { unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea, rooms, bathrooms, price, status, description, villaId } = req.body;
     if (!unitName || !price) { res.status(400).json({ error: "unitName and price are required" }); return; }
     if (Number(price) <= 0) { res.status(400).json({ error: "Price must be greater than 0" }); return; }
     const sess = req.session as Record<string, unknown>;
     const r = await conn.execute(
       `UPDATE UNITS SET UNIT_CODE=:1, UNIT_NAME=:2, TYPE_ID=:3, PROJECT_ID=:4, BUILDING_ID=:5, FLOOR_ID=:6,
-       AREA=:7, SALEABLE_AREA=:8, ROOMS=:9, BATHROOMS=:10, PRICE=:11, STATUS=:12, DESCRIPTION=:13, UPDATED_BY=:14, UPDATED_DATE=SYSDATE
-       WHERE UNIT_ID=:15`,
-      [unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea || null, rooms || 0, bathrooms || 0, price, status || "AVAILABLE", description || null, sess["username"] || "ADMIN", req.params["id"]],
+       AREA=:7, SALEABLE_AREA=:8, ROOMS=:9, BATHROOMS=:10, PRICE=:11, STATUS=:12, DESCRIPTION=:13, VILLA_ID=:14, UPDATED_BY=:15, UPDATED_DATE=SYSDATE
+       WHERE UNIT_ID=:16`,
+      [unitCode, unitName, typeId, projectId, buildingId, floorId, area, saleableArea || null, rooms || 0, bathrooms || 0, price, status || "AVAILABLE", description || null, villaId || null, sess["username"] || "ADMIN", req.params["id"]],
       { autoCommit: true },
     );
     if ((r.rowsAffected ?? 0) === 0) { res.status(404).json({ error: "Unit not found" }); return; }

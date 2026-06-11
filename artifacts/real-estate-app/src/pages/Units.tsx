@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { api, formatPrice, type Unit, type UnitType, type Villa } from "@/lib/api";
 import { Plus, Search, Eye, Edit, Home, Maximize2, Layers, BedDouble, Bath } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -30,7 +30,10 @@ export default function Units() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("");
-  const [villaFilter, setVillaFilter] = useState("");
+  const rawSearch = useSearch();
+  const [villaFilter, setVillaFilter] = useState(() => {
+    try { return new URLSearchParams(rawSearch).get("villaId") || ""; } catch { return ""; }
+  });
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const { data: units = [], isLoading } = useQuery<Unit[]>({
