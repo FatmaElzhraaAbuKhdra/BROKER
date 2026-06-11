@@ -13,11 +13,13 @@ import {
   Menu,
   X,
   ChevronLeft,
+  TreePine,
 } from "lucide-react";
 
 const nav = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/units", label: "الوحدات", icon: Home },
+  { href: "/villas", label: "الفلل", icon: TreePine },
   { href: "/unit-types", label: "أنواع الوحدات", icon: Tags },
   { href: "/buildings", label: "المباني", icon: Building2 },
   { href: "/floors", label: "الأدوار", icon: Layers },

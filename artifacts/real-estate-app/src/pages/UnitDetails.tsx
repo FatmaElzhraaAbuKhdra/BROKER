@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
-import { api, formatPrice, formatDate, type Unit, type Customer } from "@/lib/api";
-import { ArrowRight, Edit, Trash2, ShoppingCart, Upload, Star, X, Lock } from "lucide-react";
+import { api, formatPrice, formatDate, type Unit, type Customer, type Installment } from "@/lib/api";
+import { ArrowRight, Edit, Trash2, ShoppingCart, Upload, Star, X, Lock, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
+
+const emptyInstallmentForm = { dueDate: "", amount: "", paidDate: "", status: "PENDING", notes: "" };
 
 export default function UnitDetails() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +18,11 @@ export default function UnitDetails() {
   const [saleLoading, setSaleLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
 
+  const [showInstallmentModal, setShowInstallmentModal] = useState(false);
+  const [editingInstallment, setEditingInstallment] = useState<Installment | null>(null);
+  const [installmentForm, setInstallmentForm] = useState(emptyInstallmentForm);
+  const [installmentLoading, setInstallmentLoading] = useState(false);
+
   const { data: unit, isLoading } = useQuery<Unit>({
     queryKey: ["unit", id],
     queryFn: () => api.get(`/units/${id}`),
@@ -25,6 +32,13 @@ export default function UnitDetails() {
     queryKey: ["customers"],
     queryFn: () => api.get("/customers"),
     enabled: showSaleDialog,
+  });
+
+  const { data: installments = [], isLoading: installmentsLoading } = useQuery<Installment[]>({
+    queryKey: ["installments", id],
+    queryFn: () => api.get(`/installments?unitId=${id}`),
+    enabled: Boolean(id),
+    staleTime: 0,
   });
 
   if (isLoading) return <div className="text-center py-12 text-gray-500">جارٍ التحميل...</div>;
@@ -101,6 +115,70 @@ export default function UnitDetails() {
       toast.error(err instanceof Error ? err.message : "فشل");
     }
   };
+
+  const openAddInstallment = () => {
+    setEditingInstallment(null);
+    setInstallmentForm(emptyInstallmentForm);
+    setShowInstallmentModal(true);
+  };
+
+  const openEditInstallment = (inst: Installment) => {
+    setEditingInstallment(inst);
+    setInstallmentForm({
+      dueDate: inst.DUE_DATE ? inst.DUE_DATE.slice(0, 10) : "",
+      amount: String(inst.AMOUNT),
+      paidDate: inst.PAID_DATE ? inst.PAID_DATE.slice(0, 10) : "",
+      status: inst.STATUS,
+      notes: inst.NOTES || "",
+    });
+    setShowInstallmentModal(true);
+  };
+
+  const handleSaveInstallment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!installmentForm.dueDate || !installmentForm.amount) { toast.error("تاريخ الاستحقاق والمبلغ مطلوبان"); return; }
+    if (Number(installmentForm.amount) <= 0) { toast.error("المبلغ يجب أن يكون أكبر من 0"); return; }
+    setInstallmentLoading(true);
+    try {
+      const body = {
+        unitId: unit.UNIT_ID,
+        dueDate: installmentForm.dueDate,
+        amount: Number(installmentForm.amount),
+        paidDate: installmentForm.paidDate || null,
+        status: installmentForm.status,
+        notes: installmentForm.notes || null,
+      };
+      if (editingInstallment) {
+        await api.put(`/installments/${editingInstallment.INSTALLMENT_ID}`, body);
+        toast.success("تم تحديث القسط");
+      } else {
+        await api.post("/installments", body);
+        toast.success("تمت إضافة القسط");
+      }
+      qc.invalidateQueries({ queryKey: ["installments", id] });
+      setShowInstallmentModal(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل الحفظ");
+    } finally {
+      setInstallmentLoading(false);
+    }
+  };
+
+  const handleDeleteInstallment = async (installmentId: number) => {
+    if (!confirm("هل أنت متأكد من حذف هذا القسط؟")) return;
+    try {
+      await api.delete(`/installments/${installmentId}`);
+      toast.success("تم حذف القسط");
+      qc.invalidateQueries({ queryKey: ["installments", id] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل الحذف");
+    }
+  };
+
+  const ic = "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]";
+
+  const totalInstallments = installments.reduce((sum, i) => sum + i.AMOUNT, 0);
+  const paidInstallments = installments.filter(i => i.STATUS === "PAID").reduce((sum, i) => sum + i.AMOUNT, 0);
 
   return (
     <div dir="rtl" className="space-y-4">
@@ -234,6 +312,91 @@ export default function UnitDetails() {
         </div>
       </div>
 
+      {/* Installments section */}
+      <div className="bg-white rounded-lg shadow-sm border p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="font-semibold text-[#0D4D3A]">الأقساط ({installments.length})</h2>
+            {installments.length > 0 && (
+              <div className="flex gap-3 text-xs text-gray-500">
+                <span>الإجمالي: <span className="font-semibold text-[#0D4D3A]">{formatPrice(totalInstallments)}</span></span>
+                <span>المدفوع: <span className="font-semibold text-emerald-600">{formatPrice(paidInstallments)}</span></span>
+                <span>المتبقي: <span className="font-semibold text-amber-600">{formatPrice(totalInstallments - paidInstallments)}</span></span>
+              </div>
+            )}
+          </div>
+          {isAdmin && (
+            <button onClick={openAddInstallment}
+              className="flex items-center gap-2 bg-[#1A8A6C] text-white px-3 py-1.5 rounded-md text-sm hover:bg-[#147A5E] transition-colors">
+              <Plus className="w-3.5 h-3.5" /> إضافة قسط
+            </button>
+          )}
+        </div>
+
+        {installmentsLoading ? (
+          <div className="text-center py-6 text-gray-400 text-sm">جارٍ التحميل...</div>
+        ) : installments.length === 0 ? (
+          <div className="text-center py-8 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+            لا توجد أقساط مضافة
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="apex-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>تاريخ الاستحقاق</th>
+                  <th>المبلغ</th>
+                  <th>الحالة</th>
+                  <th>تاريخ الدفع</th>
+                  <th>ملاحظات</th>
+                  {isAdmin && <th>إجراءات</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {installments.map((inst, i) => (
+                  <tr key={inst.INSTALLMENT_ID}>
+                    <td className="text-gray-400">{i + 1}</td>
+                    <td className="font-mono text-sm">{formatDate(inst.DUE_DATE)}</td>
+                    <td className="font-semibold text-[#0D4D3A]">{formatPrice(inst.AMOUNT)}</td>
+                    <td>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium
+                        ${inst.STATUS === "PAID"
+                          ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                          : inst.STATUS === "OVERDUE"
+                          ? "bg-rose-100 text-rose-700 border-rose-200"
+                          : "bg-amber-100 text-amber-700 border-amber-200"}`}>
+                        {inst.STATUS === "PAID" ? "مدفوع" : inst.STATUS === "OVERDUE" ? "متأخر" : "معلق"}
+                      </span>
+                    </td>
+                    <td className="text-sm text-gray-500">
+                      {inst.PAID_DATE ? formatDate(inst.PAID_DATE) : <span className="text-gray-300">-</span>}
+                    </td>
+                    <td className="text-sm text-gray-500 max-w-[200px] truncate">
+                      {inst.NOTES || <span className="text-gray-300">-</span>}
+                    </td>
+                    {isAdmin && (
+                      <td>
+                        <div className="flex gap-2">
+                          <button onClick={() => openEditInstallment(inst)}
+                            className="text-xs border border-[#1A8A6C] text-[#1A8A6C] px-2 py-1 rounded hover:bg-[#1A8A6C] hover:text-white transition-colors">
+                            <Edit className="w-3 h-3 inline ml-1" />تعديل
+                          </button>
+                          <button onClick={() => handleDeleteInstallment(inst.INSTALLMENT_ID)}
+                            className="text-xs border border-red-400 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors">
+                            <Trash2 className="w-3 h-3 inline ml-1" />حذف
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* Sale Dialog */}
       {showSaleDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -273,6 +436,64 @@ export default function UnitDetails() {
                   {saleLoading ? "جارٍ الحفظ..." : "تأكيد البيع"}
                 </button>
                 <button type="button" onClick={() => setShowSaleDialog(false)}
+                  className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-md hover:bg-gray-50">
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Installment Add/Edit Modal */}
+      {showInstallmentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="bg-[#0D4D3A] text-white px-5 py-3 rounded-t-lg flex items-center justify-between">
+              <span className="font-semibold">{editingInstallment ? "تعديل القسط" : "إضافة قسط جديد"}</span>
+              <button onClick={() => setShowInstallmentModal(false)} className="hover:text-white/70"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleSaveInstallment} className="p-5 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">تاريخ الاستحقاق *</label>
+                <input type="date" value={installmentForm.dueDate}
+                  onChange={e => setInstallmentForm(f => ({ ...f, dueDate: e.target.value }))} required
+                  className={ic} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">المبلغ (ريال) *</label>
+                <input type="number" value={installmentForm.amount}
+                  onChange={e => setInstallmentForm(f => ({ ...f, amount: e.target.value }))} required min={1}
+                  className={ic} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">الحالة</label>
+                <select value={installmentForm.status}
+                  onChange={e => setInstallmentForm(f => ({ ...f, status: e.target.value }))}
+                  className={ic}>
+                  <option value="PENDING">معلق</option>
+                  <option value="PAID">مدفوع</option>
+                  <option value="OVERDUE">متأخر</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">تاريخ الدفع</label>
+                <input type="date" value={installmentForm.paidDate}
+                  onChange={e => setInstallmentForm(f => ({ ...f, paidDate: e.target.value }))}
+                  className={ic} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">ملاحظات</label>
+                <textarea value={installmentForm.notes}
+                  onChange={e => setInstallmentForm(f => ({ ...f, notes: e.target.value }))} rows={2}
+                  className={ic} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="submit" disabled={installmentLoading}
+                  className="flex-1 bg-[#1A8A6C] text-white py-2 rounded-md font-medium hover:bg-[#147A5E] disabled:opacity-60">
+                  {installmentLoading ? "جارٍ الحفظ..." : "حفظ"}
+                </button>
+                <button type="button" onClick={() => setShowInstallmentModal(false)}
                   className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-md hover:bg-gray-50">
                   إلغاء
                 </button>

@@ -13,6 +13,7 @@ import Buildings from "@/pages/Buildings";
 import Floors from "@/pages/Floors";
 import Customers from "@/pages/Customers";
 import Sales from "@/pages/Sales";
+import Villas from "@/pages/Villas";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/floors" component={() => <ProtectedRoute component={Floors} />} />
       <Route path="/customers" component={() => <ProtectedRoute component={Customers} />} />
       <Route path="/sales" component={() => <ProtectedRoute component={Sales} />} />
+      <Route path="/villas" component={() => <ProtectedRoute component={Villas} />} />
       <Route component={() => <Redirect to="/dashboard" />} />
     </Switch>
   );

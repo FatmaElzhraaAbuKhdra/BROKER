@@ -57,6 +57,8 @@ export async function initDatabase(): Promise<{
       ["SEQ_UNITS", "CREATE SEQUENCE SEQ_UNITS START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE"],
       ["SEQ_SALES", "CREATE SEQUENCE SEQ_SALES START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE"],
       ["SEQ_UNIT_IMAGES", "CREATE SEQUENCE SEQ_UNIT_IMAGES START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE"],
+      ["SEQ_VILLAS", "CREATE SEQUENCE SEQ_VILLAS START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE"],
+      ["SEQ_INSTALLMENTS", "CREATE SEQUENCE SEQ_INSTALLMENTS START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE"],
     ] as const;
 
     for (const [name, sql] of sequences) {
@@ -224,6 +226,48 @@ export async function initDatabase(): Promise<{
       created.push("FLOORS (exists)");
     }
 
+    // VILLAS table
+    if (!(await tableExists(conn, "VILLAS"))) {
+      await executeStatement(
+        conn,
+        `CREATE TABLE VILLAS (
+          VILLA_ID     NUMBER         NOT NULL,
+          PROJECT_ID   NUMBER         NOT NULL,
+          VILLA_CODE   VARCHAR2(100)  NOT NULL,
+          VILLA_NAME   VARCHAR2(300)  NOT NULL,
+          AREA         NUMBER(10,2)   NOT NULL,
+          LAND_AREA    NUMBER(10,2),
+          ROOMS        NUMBER         DEFAULT 0,
+          BATHROOMS    NUMBER         DEFAULT 0,
+          PRICE        NUMBER(15,2)   NOT NULL,
+          STATUS       VARCHAR2(20)   DEFAULT 'AVAILABLE',
+          DESCRIPTION  VARCHAR2(2000),
+          CREATED_BY   VARCHAR2(100),
+          CREATED_DATE DATE           DEFAULT SYSDATE,
+          UPDATED_BY   VARCHAR2(100),
+          UPDATED_DATE DATE,
+          CONSTRAINT PK_VILLAS PRIMARY KEY (VILLA_ID),
+          CONSTRAINT UQ_VILLAS_CODE UNIQUE (VILLA_CODE),
+          CONSTRAINT FK_VILLAS_PROJECT FOREIGN KEY (PROJECT_ID) REFERENCES PROJECTS(PROJECT_ID),
+          CONSTRAINT CHK_VILLAS_STATUS CHECK (STATUS IN ('AVAILABLE','SOLD','RESERVED')),
+          CONSTRAINT CHK_VILLAS_PRICE CHECK (PRICE >= 0),
+          CONSTRAINT CHK_VILLAS_AREA CHECK (AREA > 0)
+        )`,
+        "Table VILLAS",
+      );
+      await executeStatement(conn, `CREATE OR REPLACE TRIGGER TRG_VILLAS_ID
+        BEFORE INSERT ON VILLAS FOR EACH ROW
+        BEGIN
+          IF :NEW.VILLA_ID IS NULL THEN
+            SELECT SEQ_VILLAS.NEXTVAL INTO :NEW.VILLA_ID FROM DUAL;
+          END IF;
+        END;`, "Trigger TRG_VILLAS_ID");
+      await executeStatement(conn, "CREATE INDEX IDX_VILLAS_PROJECT ON VILLAS (PROJECT_ID)", "Index IDX_VILLAS_PROJECT");
+      created.push("VILLAS");
+    } else {
+      created.push("VILLAS (exists)");
+    }
+
     // CUSTOMERS table
     if (!(await tableExists(conn, "CUSTOMERS"))) {
       await executeStatement(
@@ -375,6 +419,41 @@ export async function initDatabase(): Promise<{
       created.push("UNIT_IMAGES (exists)");
     }
 
+    // INSTALLMENTS table
+    if (!(await tableExists(conn, "INSTALLMENTS"))) {
+      await executeStatement(
+        conn,
+        `CREATE TABLE INSTALLMENTS (
+          INSTALLMENT_ID NUMBER         NOT NULL,
+          UNIT_ID        NUMBER         NOT NULL,
+          DUE_DATE       DATE           NOT NULL,
+          AMOUNT         NUMBER(15,2)   NOT NULL,
+          PAID_DATE      DATE,
+          STATUS         VARCHAR2(20)   DEFAULT 'PENDING',
+          NOTES          VARCHAR2(1000),
+          CREATED_BY     VARCHAR2(100),
+          CREATED_DATE   DATE           DEFAULT SYSDATE,
+          UPDATED_BY     VARCHAR2(100),
+          UPDATED_DATE   DATE,
+          CONSTRAINT PK_INSTALLMENTS PRIMARY KEY (INSTALLMENT_ID),
+          CONSTRAINT FK_INSTALLMENTS_UNIT FOREIGN KEY (UNIT_ID) REFERENCES UNITS(UNIT_ID) ON DELETE CASCADE,
+          CONSTRAINT CHK_INSTALLMENTS_STATUS CHECK (STATUS IN ('PENDING','PAID','OVERDUE'))
+        )`,
+        "Table INSTALLMENTS",
+      );
+      await executeStatement(conn, `CREATE OR REPLACE TRIGGER TRG_INSTALLMENTS_ID
+        BEFORE INSERT ON INSTALLMENTS FOR EACH ROW
+        BEGIN
+          IF :NEW.INSTALLMENT_ID IS NULL THEN
+            SELECT SEQ_INSTALLMENTS.NEXTVAL INTO :NEW.INSTALLMENT_ID FROM DUAL;
+          END IF;
+        END;`, "Trigger TRG_INSTALLMENTS_ID");
+      await executeStatement(conn, "CREATE INDEX IDX_INSTALLMENTS_UNIT ON INSTALLMENTS (UNIT_ID)", "Index IDX_INSTALLMENTS_UNIT");
+      created.push("INSTALLMENTS");
+    } else {
+      created.push("INSTALLMENTS (exists)");
+    }
+
     // ── Schema migrations: add missing columns safely ──────────────────────────
     async function columnExists(table: string, col: string): Promise<boolean> {
       const r = await conn!.execute<[number]>(
@@ -399,6 +478,19 @@ export async function initDatabase(): Promise<{
     if (!(await columnExists("UNITS", "SALEABLE_AREA"))) {
       await executeStatement(conn, `ALTER TABLE UNITS ADD SALEABLE_AREA NUMBER(10,2)`, "ALTER UNITS ADD SALEABLE_AREA");
       created.push("UNITS.SALEABLE_AREA");
+    }
+    if (!(await columnExists("UNITS", "VILLA_ID"))) {
+      await executeStatement(conn, `ALTER TABLE UNITS ADD VILLA_ID NUMBER`, "ALTER UNITS ADD VILLA_ID");
+      created.push("UNITS.VILLA_ID");
+    }
+    {
+      const fkChk = await conn.execute<[number]>(
+        `SELECT COUNT(*) FROM USER_CONSTRAINTS WHERE CONSTRAINT_NAME=:1`,
+        ["FK_UNITS_VILLA"],
+      );
+      if ((fkChk.rows?.[0]?.[0] ?? 0) === 0) {
+        await executeStatement(conn, `ALTER TABLE UNITS ADD CONSTRAINT FK_UNITS_VILLA FOREIGN KEY (VILLA_ID) REFERENCES VILLAS(VILLA_ID)`, "FK_UNITS_VILLA");
+      }
     }
 
     // ── Constraint migration: allow PRICE = 0 (unpriced units) ──────────────

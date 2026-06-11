@@ -176,6 +176,33 @@ export interface RecentSale {
   SALE_DATE: string;
 }
 
+export interface Villa {
+  VILLA_ID: number;
+  PROJECT_ID: number;
+  VILLA_CODE: string;
+  VILLA_NAME: string;
+  AREA: number;
+  LAND_AREA: number | null;
+  ROOMS: number;
+  BATHROOMS: number;
+  PRICE: number;
+  STATUS: "AVAILABLE" | "SOLD" | "RESERVED";
+  DESCRIPTION: string;
+  PROJECT_NAME: string;
+  CREATED_DATE: string;
+}
+
+export interface Installment {
+  INSTALLMENT_ID: number;
+  UNIT_ID: number;
+  DUE_DATE: string;
+  AMOUNT: number;
+  PAID_DATE: string | null;
+  STATUS: "PENDING" | "PAID" | "OVERDUE";
+  NOTES: string | null;
+  CREATED_DATE: string;
+}
+
 export function formatPrice(price: number): string {
   return new Intl.NumberFormat("ar-SA", {
     style: "currency",

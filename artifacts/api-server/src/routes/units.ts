@@ -46,7 +46,7 @@ const UNIT_SELECT = `
 
 // GET /api/units
 router.get("/units", requireAuth, async (req, res) => {
-  const { status, typeId, search } = req.query;
+  const { status, typeId, villaId, search } = req.query;
   let conn;
   try {
     conn = await getConnection();
@@ -55,6 +55,7 @@ router.get("/units", requireAuth, async (req, res) => {
     let idx = 1;
     if (status && status !== "ALL") { sql += ` AND u.STATUS = :${idx++}`; params.push(status); }
     if (typeId) { sql += ` AND u.TYPE_ID = :${idx++}`; params.push(typeId); }
+    if (villaId) { sql += ` AND u.VILLA_ID = :${idx++}`; params.push(villaId); }
     if (search) { sql += ` AND (UPPER(u.UNIT_CODE) LIKE UPPER(:${idx}) OR UPPER(u.UNIT_NAME) LIKE UPPER(:${idx + 1}))`; params.push(`%${search}%`, `%${search}%`); idx += 2; }
     sql += ` ORDER BY u.UNIT_ID`;
     const result = await conn.execute(sql, params, { outFormat: oracledb.OUT_FORMAT_OBJECT });
