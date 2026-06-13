@@ -107,6 +107,48 @@ router.put("/installments/:id", requireAdmin, async (req, res) => {
   }
 });
 
+// POST /api/installments/generate — delete existing and create a monthly schedule
+router.post("/installments/generate", requireAdmin, async (req, res) => {
+  const { unitId, totalAmount, startDate, numberOfMonths } = req.body;
+  if (!unitId || !totalAmount || !startDate || !numberOfMonths) {
+    res.status(400).json({ error: "unitId, totalAmount, startDate, numberOfMonths are required" }); return;
+  }
+  const months = Number(numberOfMonths);
+  const total = Number(totalAmount);
+  if (months < 1 || months > 360) { res.status(400).json({ error: "numberOfMonths must be 1-360" }); return; }
+  if (total <= 0) { res.status(400).json({ error: "totalAmount must be > 0" }); return; }
+  const parts = String(startDate).split("-");
+  const yr = Number(parts[0]);
+  const mo = Number(parts[1]);
+  if (!yr || !mo || mo < 1 || mo > 12) { res.status(400).json({ error: "startDate must be YYYY-MM" }); return; }
+  const sess = req.session as Record<string, unknown>;
+  const monthly = Math.round((total / months) * 100) / 100;
+  let conn;
+  try {
+    conn = await getConnection();
+    await conn.execute(`DELETE FROM INSTALLMENTS WHERE UNIT_ID = :1`, [unitId], { autoCommit: false });
+    for (let i = 0; i < months; i++) {
+      const d = new Date(yr, mo - 1 + i, 1);
+      const dueDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+      const amount = i === months - 1 ? Math.round((total - monthly * (months - 1)) * 100) / 100 : monthly;
+      await conn.execute(
+        `INSERT INTO INSTALLMENTS (UNIT_ID, DUE_DATE, AMOUNT, PAID_AMOUNT, PAID_DATE, STATUS, NOTES, CREATED_BY)
+         VALUES (:1, TO_DATE(:2,'YYYY-MM-DD'), :3, 0, NULL, 'PENDING', NULL, :4)`,
+        [unitId, dueDate, amount, sess["username"] || "ADMIN"],
+        { autoCommit: false },
+      );
+    }
+    await conn.commit();
+    res.json({ message: "Schedule generated", created: months });
+  } catch (err) {
+    if (conn) await conn.rollback().catch(() => {});
+    req.log.error({ err }, "Generate installments error");
+    res.status(500).json({ error: "Failed to generate installments" });
+  } finally {
+    if (conn) await conn.close().catch(() => {});
+  }
+});
+
 // DELETE /api/installments/:id
 router.delete("/installments/:id", requireAdmin, async (req, res) => {
   let conn;
