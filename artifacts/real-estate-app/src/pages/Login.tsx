@@ -35,7 +35,7 @@ export default function Login() {
         <div className="bg-[#0D4D3A] text-white p-6 text-center border-b-4 border-[#25B897]">
           <div className="flex justify-center mb-4">
             <div className="bg-white rounded-xl p-3 shadow-lg">
-              <img src="/app/logo.png" alt="لبينات للتطوير العقاري" className="w-20 h-20 object-contain" />
+              <img src="/logo.png" alt="لبينات للتطوير العقاري" className="w-20 h-20 object-contain" />
             </div>
           </div>
           <h1 className="text-xl font-bold mb-1">شركة لبينات العقارية</h1>

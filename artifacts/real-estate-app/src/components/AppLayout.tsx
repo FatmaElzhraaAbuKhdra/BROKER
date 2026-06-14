@@ -57,7 +57,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         >
           <div className="flex-shrink-0 bg-white rounded-lg p-1">
             <img
-              src="/app/logo.png"
+              src="/logo.png"
               alt="لبينات"
               className="w-8 h-8 object-contain"
             />
@@ -150,7 +150,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-2">
             <img
-              src="/app/logo.png"
+              src="/logo.png"
               alt=""
               className="w-7 h-7 object-contain bg-white rounded p-0.5"
             />
