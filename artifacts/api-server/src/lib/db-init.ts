@@ -530,6 +530,7 @@ export async function initDatabase(): Promise<{
     // If the JOIN returns 0 but raw tables have data, references are broken → wipe and reseed.
     const joinCheck = await conn.execute<[number]>(
       `SELECT COUNT(*) FROM UNITS u
+       JOIN UNIT_TYPES t ON u.TYPE_ID = t.TYPE_ID
        JOIN PROJECTS p ON u.PROJECT_ID = p.PROJECT_ID
        JOIN BUILDINGS b ON u.BUILDING_ID = b.BUILDING_ID
        JOIN FLOORS f ON u.FLOOR_ID = f.FLOOR_ID`,
