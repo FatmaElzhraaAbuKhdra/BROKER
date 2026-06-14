@@ -20,9 +20,9 @@ const DISPLAY_CONFIG = {
     label: "متاح",
   },
   PARTIALLY_SOLD: {
-    border: "border-amber-400",
-    header: "bg-gradient-to-l from-amber-500 to-amber-400",
-    badge: "bg-amber-100 text-amber-700 border border-amber-200",
+    border: "border-yellow-400",
+    header: "bg-gradient-to-l from-yellow-500 to-yellow-400",
+    badge: "bg-yellow-100 text-yellow-700 border border-yellow-200",
     label: "مباع جزئياً",
   },
   FULLY_SOLD: {
@@ -192,7 +192,7 @@ export default function Villas() {
             const progressColor = progress === 100 ? "#dc3545" : progress > 0 ? "#f59e0b" : "#1A8A6C";
             return (
               <div key={villa.VILLA_ID}
-                onClick={() => navigate(`/villas/${villa.VILLA_ID}`)}
+                onClick={() => navigate(`/units?villaId=${villa.VILLA_ID}`)}
                 className={`bg-white rounded-xl shadow-sm border-2 ${c.border} transition-all duration-200 hover:shadow-lg hover:-translate-y-1 flex flex-col overflow-hidden cursor-pointer`}>
 
                 {/* Colored header */}
@@ -338,9 +338,9 @@ export default function Villas() {
                   <select className={ic} value={form.status} onChange={s("status")}>
                     <option value="AVAILABLE">متاح</option>
                     <option value="RESERVED">محجوز</option>
-                    <option value="PARTIALLY_SOLD">مباع جزئياً</option>
-                    <option value="SOLD">مباع كلياً</option>
+                    <option value="SOLD">مباع</option>
                   </select>
+                  <p className="text-xs text-gray-400 mt-1">حالة "مباع جزئياً" تُحسب تلقائياً من عدد الوحدات المباعة</p>
                 </div>
               )}
               <div>
