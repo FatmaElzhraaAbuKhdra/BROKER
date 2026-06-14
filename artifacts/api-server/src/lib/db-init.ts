@@ -526,9 +526,16 @@ export async function initDatabase(): Promise<{
     logger.info("DB Init: reset placeholder PRICE=1 → 0 for available units");
     // ────────────────────────────────────────────────────────────────────────────
 
-    // If UNITS is empty but PROJECTS/BUILDINGS/FLOORS exist (orphaned state from
-    // prior cleanups), wipe them so seedData can start fresh with correct IDs.
-    if ((await rowCount(conn, "UNITS")) === 0 && (await rowCount(conn, "PROJECTS")) > 0) {
+    // Check if units are actually queryable via their JOINs (not just raw count).
+    // If the JOIN returns 0 but raw tables have data, references are broken → wipe and reseed.
+    const joinCheck = await conn.execute<[number]>(
+      `SELECT COUNT(*) FROM UNITS u
+       JOIN PROJECTS p ON u.PROJECT_ID = p.PROJECT_ID
+       JOIN BUILDINGS b ON u.BUILDING_ID = b.BUILDING_ID
+       JOIN FLOORS f ON u.FLOOR_ID = f.FLOOR_ID`,
+    );
+    const usableUnits = joinCheck.rows?.[0]?.[0] ?? 0;
+    if (usableUnits === 0) {
       await conn.execute(`DELETE FROM INSTALLMENTS`);
       await conn.execute(`DELETE FROM SALES`);
       await conn.execute(`DELETE FROM UNIT_IMAGES`);
@@ -537,7 +544,8 @@ export async function initDatabase(): Promise<{
       await conn.execute(`DELETE FROM FLOORS`);
       await conn.execute(`DELETE FROM BUILDINGS`);
       await conn.execute(`DELETE FROM PROJECTS`);
-      logger.info("DB Init: cleared orphaned project data — will reseed");
+      await conn.execute(`DELETE FROM CUSTOMERS`);
+      logger.info("DB Init: cleared broken/empty data — will reseed");
     }
 
     // SEED DATA — only if tables are empty
