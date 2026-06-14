@@ -11,6 +11,15 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=8080 BASE_PATH=/ pnpm --filter @workspace/real-estate-app build && pnpm --filter @workspace/api-server build && node --enable-source-maps artifacts/api-server/dist/index.mjs"
+env = { PORT = "8080", NODE_ENV = "production" }
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
