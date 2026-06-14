@@ -526,8 +526,19 @@ export async function initDatabase(): Promise<{
     logger.info("DB Init: reset placeholder PRICE=1 → 0 for available units");
     // ────────────────────────────────────────────────────────────────────────────
 
-    // CLEANUP: remove demo data not in the client file
-    await cleanDemoData(conn);
+    // If UNITS is empty but PROJECTS/BUILDINGS/FLOORS exist (orphaned state from
+    // prior cleanups), wipe them so seedData can start fresh with correct IDs.
+    if ((await rowCount(conn, "UNITS")) === 0 && (await rowCount(conn, "PROJECTS")) > 0) {
+      await conn.execute(`DELETE FROM INSTALLMENTS`);
+      await conn.execute(`DELETE FROM SALES`);
+      await conn.execute(`DELETE FROM UNIT_IMAGES`);
+      await conn.execute(`DELETE FROM UNITS`);
+      await conn.execute(`DELETE FROM VILLAS`);
+      await conn.execute(`DELETE FROM FLOORS`);
+      await conn.execute(`DELETE FROM BUILDINGS`);
+      await conn.execute(`DELETE FROM PROJECTS`);
+      logger.info("DB Init: cleared orphaned project data — will reseed");
+    }
 
     // SEED DATA — only if tables are empty
     await seedData(conn);
