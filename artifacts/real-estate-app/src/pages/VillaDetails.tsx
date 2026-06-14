@@ -5,6 +5,14 @@ import { ArrowRight, Home, Maximize2, BedDouble, Bath, Layers, Eye, Building } f
 import { useAuth } from "@/lib/auth-context";
 
 const UNIT_STATUS_LABELS: Record<string, string> = { AVAILABLE: "متاح", SOLD: "مباع", RESERVED: "محجوز" };
+
+const VILLA_DISPLAY: Record<string, { badge: string; label: string }> = {
+  AVAILABLE:      { badge: "bg-emerald-100 text-emerald-700", label: "متاح" },
+  PARTIALLY_SOLD: { badge: "bg-amber-100 text-amber-700",     label: "مباع جزئياً" },
+  FULLY_SOLD:     { badge: "bg-rose-100 text-rose-700",       label: "مباع كلياً" },
+  RESERVED:       { badge: "bg-blue-100 text-blue-700",       label: "محجوز" },
+};
+
 const UNIT_STATUS_CONFIG: Record<string, { border: string; header: string; badge: string }> = {
   AVAILABLE: {
     border: "border-emerald-400",
@@ -62,6 +70,13 @@ export default function VillaDetails() {
   const progress = units.length > 0 ? Math.round((soldUnits / units.length) * 100) : 0;
   const progressColor = progress === 100 ? "#dc3545" : progress > 0 ? "#f59e0b" : "#1A8A6C";
 
+  const villaDisplayStatus = unitsLoading || units.length === 0
+    ? (villa.STATUS === "RESERVED" ? "RESERVED" : "AVAILABLE")
+    : soldUnits >= units.length ? "FULLY_SOLD"
+    : soldUnits > 0 ? "PARTIALLY_SOLD"
+    : "AVAILABLE";
+  const vd = VILLA_DISPLAY[villaDisplayStatus] ?? VILLA_DISPLAY.AVAILABLE;
+
   return (
     <div dir="rtl" className="space-y-4">
       {/* Breadcrumb */}
@@ -85,10 +100,16 @@ export default function VillaDetails() {
             </div>
             <div className="text-left shrink-0">
               <div className="text-2xl font-bold">{formatPrice(villa.PRICE)}</div>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block
-                ${villa.STATUS === "SOLD" ? "bg-rose-100 text-rose-700" : villa.STATUS === "RESERVED" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>
-                {villa.STATUS === "SOLD" ? "مباع" : villa.STATUS === "RESERVED" ? "محجوز" : "متاح"}
-              </span>
+              <div className="flex items-center gap-2 mt-1 justify-end flex-wrap">
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${vd.badge}`}>
+                  {vd.label}
+                </span>
+                {!unitsLoading && units.length > 0 && (
+                  <span className="text-xs text-white/80 font-mono">
+                    {soldUnits} من {units.length} مباع
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

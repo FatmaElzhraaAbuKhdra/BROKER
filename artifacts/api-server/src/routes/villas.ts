@@ -144,14 +144,17 @@ router.put("/villas/:id", requireAdmin, async (req, res) => {
   try {
     conn = await getConnection();
     const chk = await conn.execute<[string]>(`SELECT STATUS FROM VILLAS WHERE VILLA_ID=:1`, [req.params["id"]]);
-    if ((chk.rows?.[0]?.[0] ?? "") === "SOLD") {
+    const currentStatus = chk.rows?.[0]?.[0] ?? "";
+    if (currentStatus === "SOLD") {
       res.status(403).json({ error: "Cannot edit a SOLD villa" }); return;
     }
+    const allowedStatuses = ["AVAILABLE", "RESERVED", "PARTIALLY_SOLD", "SOLD"];
+    const newStatus = allowedStatuses.includes(status) ? status : "AVAILABLE";
     const r = await conn.execute(
       `UPDATE VILLAS SET PROJECT_ID=:1, VILLA_CODE=:2, VILLA_NAME=:3, AREA=:4, LAND_AREA=:5,
        ROOMS=:6, BATHROOMS=:7, PRICE=:8, STATUS=:9, DESCRIPTION=:10, UPDATED_BY=:11, UPDATED_DATE=SYSDATE
        WHERE VILLA_ID=:12`,
-      [projectId, villaCode, villaName, area, landArea || null, rooms || 0, bathrooms || 0, price, status || "AVAILABLE", description || null, sess["username"] || "ADMIN", req.params["id"]],
+      [projectId, villaCode, villaName, area, landArea || null, rooms || 0, bathrooms || 0, price, newStatus, description || null, sess["username"] || "ADMIN", req.params["id"]],
       { autoCommit: true },
     );
     if ((r.rowsAffected ?? 0) === 0) { res.status(404).json({ error: "Villa not found" }); return; }
@@ -170,8 +173,9 @@ router.delete("/villas/:id", requireAdmin, async (req, res) => {
   try {
     conn = await getConnection();
     const chk = await conn.execute<[string]>(`SELECT STATUS FROM VILLAS WHERE VILLA_ID=:1`, [req.params["id"]]);
-    if ((chk.rows?.[0]?.[0] ?? "") === "SOLD") {
-      res.status(403).json({ error: "Cannot delete a SOLD villa" }); return;
+    const delStatus = chk.rows?.[0]?.[0] ?? "";
+    if (delStatus === "SOLD" || delStatus === "PARTIALLY_SOLD") {
+      res.status(403).json({ error: "Cannot delete a sold villa" }); return;
     }
     const unitChk = await conn.execute<[number]>(`SELECT COUNT(*) FROM UNITS WHERE VILLA_ID=:1`, [req.params["id"]]);
     if ((unitChk.rows?.[0]?.[0] ?? 0) > 0) {

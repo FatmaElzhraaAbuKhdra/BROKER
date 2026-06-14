@@ -5,6 +5,7 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import { existsSync } from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
@@ -56,6 +57,15 @@ const uploadsDir = path.resolve(__dirname, "../uploads");
 app.use("/api/uploads", express.static(uploadsDir));
 
 app.use("/api", router);
+
+// Serve React frontend in production (Express handles both API + static files)
+if (process.env["NODE_ENV"] === "production") {
+  const frontendDist = path.resolve(__dirname, "../../real-estate-app/dist/public");
+  app.use(express.static(frontendDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
 
 export default app;
 export { uploadsDir };

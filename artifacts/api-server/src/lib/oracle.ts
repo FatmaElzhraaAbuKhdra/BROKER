@@ -6,19 +6,27 @@ let poolCreated = false;
 export async function initPool(): Promise<void> {
   if (poolCreated) return;
 
-  const host = process.env["Host"];
-  const port = process.env["Port"] || "1521";
-  const serviceName = process.env["Service_Name"];
   const schema = process.env["Schema"];
   const password = process.env["Password"];
 
-  if (!host || !serviceName || !schema || !password) {
-    throw new Error(
-      "Missing Oracle secrets: Host, Service_Name, Schema, Password are required",
-    );
+  if (!schema || !password) {
+    throw new Error("Missing Oracle secrets: Schema and Password are required");
   }
 
-  const connectString = `${host}:${port}/${serviceName}`;
+  // Support full connection string (e.g. Oracle Cloud ATP: tcps://host:1522/service)
+  // or build from individual components for standard Oracle DB
+  let connectString = process.env["CONNECTION_STRING"];
+  if (!connectString) {
+    const host = process.env["Host"];
+    const port = process.env["Port"] || "1521";
+    const serviceName = process.env["Service_Name"];
+    if (!host || !serviceName) {
+      throw new Error(
+        "Missing Oracle secrets: provide CONNECTION_STRING or (Host, Service_Name)",
+      );
+    }
+    connectString = `${host}:${port}/${serviceName}`;
+  }
 
   try {
     await oracledb.createPool({
@@ -31,7 +39,7 @@ export async function initPool(): Promise<void> {
       poolPingInterval: 60,
     });
     poolCreated = true;
-    logger.info({ host, port, serviceName }, "Oracle connection pool created");
+    logger.info({ connectString }, "Oracle connection pool created");
   } catch (err) {
     logger.error({ err }, "Failed to create Oracle connection pool");
     throw err;

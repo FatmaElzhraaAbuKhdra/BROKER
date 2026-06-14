@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: broker-estate-manager
+    runtime: docker
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CONNECTION_STRING
+        sync: false
+      - key: Schema
+        sync: false
+      - key: Password
+        sync: false
+      - key: SESSION_SECRET
+        sync: false

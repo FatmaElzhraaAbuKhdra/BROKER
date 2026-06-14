@@ -33,7 +33,9 @@ const DISPLAY_CONFIG = {
   },
 };
 
-const STATUS_LABELS: Record<string, string> = { AVAILABLE: "متاح", SOLD: "مباع", RESERVED: "محجوز" };
+const FILTER_LABELS: Record<string, string> = {
+  ALL: "الكل", AVAILABLE: "متاح", PARTIALLY_SOLD: "مباع جزئياً", FULLY_SOLD: "مباع كلياً", RESERVED: "محجوز",
+};
 
 const emptyForm = {
   projectId: "", villaCode: "", villaName: "", area: "", landArea: "",
@@ -52,17 +54,23 @@ export default function Villas() {
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(false);
 
-  const { data: villas = [], isLoading } = useQuery<Villa[]>({
+  const isComputedFilter = statusFilter === "PARTIALLY_SOLD" || statusFilter === "FULLY_SOLD";
+
+  const { data: rawVillas = [], isLoading } = useQuery<Villa[]>({
     queryKey: ["villas", search, statusFilter, projectFilter],
     queryFn: () => {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
-      if (statusFilter && statusFilter !== "ALL") params.set("status", statusFilter);
+      if (statusFilter && statusFilter !== "ALL" && !isComputedFilter) params.set("status", statusFilter);
       if (projectFilter) params.set("projectId", projectFilter);
       return api.get(`/villas?${params}`);
     },
     staleTime: 0,
   });
+
+  const villas = isComputedFilter
+    ? rawVillas.filter(v => getDisplayStatus(v) === statusFilter)
+    : rawVillas;
 
   const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ["projects"],
@@ -150,10 +158,10 @@ export default function Villas() {
             onChange={e => setSearch(e.target.value)}
             className="w-full pr-9 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]" />
         </div>
-        {["ALL", "AVAILABLE", "SOLD", "RESERVED"].map(st => (
+        {["ALL", "AVAILABLE", "PARTIALLY_SOLD", "FULLY_SOLD", "RESERVED"].map(st => (
           <button key={st} onClick={() => setStatusFilter(st)}
             className={`px-3 py-1.5 rounded-md text-sm border transition-colors ${statusFilter === st ? "bg-[#1A8A6C] text-white border-[#1A8A6C]" : "border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
-            {st === "ALL" ? "الكل" : STATUS_LABELS[st]}
+            {FILTER_LABELS[st]}
           </button>
         ))}
         <select value={projectFilter} onChange={e => setProjectFilter(e.target.value)}
@@ -330,7 +338,8 @@ export default function Villas() {
                   <select className={ic} value={form.status} onChange={s("status")}>
                     <option value="AVAILABLE">متاح</option>
                     <option value="RESERVED">محجوز</option>
-                    <option value="SOLD">مباع</option>
+                    <option value="PARTIALLY_SOLD">مباع جزئياً</option>
+                    <option value="SOLD">مباع كلياً</option>
                   </select>
                 </div>
               )}
