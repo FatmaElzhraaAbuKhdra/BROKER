@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useSearch } from "wouter";
-import { api, formatPrice, type Unit, type UnitType, type Villa } from "@/lib/api";
+import { api, formatPrice, type Unit, type UnitType } from "@/lib/api";
 import { Plus, Search, Eye, Edit, Home, Maximize2, Layers, BedDouble, Bath } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -27,23 +27,23 @@ const STATUS_CONFIG: Record<string, { border: string; header: string; badge: str
 export default function Units() {
   const [, navigate] = useLocation();
   const { isAdmin } = useAuth();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [typeFilter, setTypeFilter] = useState("");
   const rawSearch = useSearch();
-  const [villaFilter, setVillaFilter] = useState(() => {
-    try { return new URLSearchParams(rawSearch).get("villaId") || ""; } catch { return ""; }
+  const [search, setSearch] = useState(() => {
+    try { return new URLSearchParams(rawSearch).get("search") || ""; } catch { return ""; }
+  });
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [typeFilter, setTypeFilter] = useState(() => {
+    try { return new URLSearchParams(rawSearch).get("typeId") || ""; } catch { return ""; }
   });
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const { data: units = [], isLoading } = useQuery<Unit[]>({
-    queryKey: ["units", search, statusFilter, typeFilter, villaFilter],
+    queryKey: ["units", search, statusFilter, typeFilter],
     queryFn: () => {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       if (statusFilter && statusFilter !== "ALL") params.set("status", statusFilter);
       if (typeFilter) params.set("typeId", typeFilter);
-      if (villaFilter) params.set("villaId", villaFilter);
       return api.get(`/units?${params}`);
     },
     staleTime: 0,
@@ -52,11 +52,6 @@ export default function Units() {
   const { data: types = [] } = useQuery<UnitType[]>({
     queryKey: ["unit-types"],
     queryFn: () => api.get("/unit-types"),
-  });
-
-  const { data: villas = [] } = useQuery<Villa[]>({
-    queryKey: ["villas"],
-    queryFn: () => api.get("/villas"),
   });
 
   const cfg = (status: string) => STATUS_CONFIG[status] ?? STATUS_CONFIG.AVAILABLE;
@@ -93,13 +88,6 @@ export default function Units() {
           <option value="">جميع الأنواع</option>
           {types.map(t => <option key={t.TYPE_ID} value={t.TYPE_ID}>{t.TYPE_NAME}</option>)}
         </select>
-        {villas.length > 0 && (
-          <select value={villaFilter} onChange={e => setVillaFilter(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A8A6C]">
-            <option value="">جميع الفلل</option>
-            {villas.map(v => <option key={v.VILLA_ID} value={v.VILLA_ID}>{v.VILLA_NAME}</option>)}
-          </select>
-        )}
       </div>
 
       {/* Summary count */}

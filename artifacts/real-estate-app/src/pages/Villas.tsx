@@ -192,7 +192,7 @@ export default function Villas() {
             const progressColor = progress === 100 ? "#dc3545" : progress > 0 ? "#f59e0b" : "#1A8A6C";
             return (
               <div key={villa.VILLA_ID}
-                onClick={() => navigate(`/units?villaId=${villa.VILLA_ID}`)}
+                onClick={() => navigate(`/units?search=${encodeURIComponent(villa.VILLA_CODE)}&typeId=2`)}
                 className={`bg-white rounded-xl shadow-sm border-2 ${c.border} transition-all duration-200 hover:shadow-lg hover:-translate-y-1 flex flex-col overflow-hidden cursor-pointer`}>
 
                 {/* Colored header */}
